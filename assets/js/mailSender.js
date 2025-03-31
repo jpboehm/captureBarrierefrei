@@ -15,6 +15,8 @@ class MailSender {
             preserveFormHandlers: false, // Option zum Erhalten vorhandener Handlers
             resetFormOnSuccess: true,    // Formular nur bei Erfolg zurücksetzen
             resetFormOnFailure: false,   // Formular bei Fehlern nicht zurücksetzen
+            maxFileSize: 5 * 1024 * 1024, // 5MB maximale Dateigröße
+            allowedFileTypes: ['.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx'], // Erlaubte Dateitypen
             ...config // Überschreibe mit benutzerdefinierten Einstellungen
         };
 
@@ -75,22 +77,45 @@ class MailSender {
         // Verhindern der Standard-Formularübermittlung, aber Ereignis-Propagation erlauben für andere Handler
         event.preventDefault();
         
-        // WICHTIG: event.stopPropagation() wurde entfernt, damit andere Handler auch ausgeführt werden können
-        
         try {
             const form = event.target;
-            const formData = this.scanFormFields(form);
             
-            // Füge Empfänger hinzu
-            formData.recipient = this.config.recipient;
-            formData.subject = this.config.subject;
+            // FormData-Objekt für Dateien und reguläre Felder verwenden
+            const formDataObj = new FormData(form);
             
+            // Empfänger und Betreff manuell hinzufügen
+            formDataObj.append('recipient', this.config.recipient);
+            formDataObj.append('subject', this.config.subject);
+            
+            // Nur für Debugging - reguläre Formulardaten zeigen
             if (this.config.debug) {
-                console.log('MailSender: Gesammelte Formulardaten:', formData);
+                const formFields = {};
+                for (let [key, value] of formDataObj.entries()) {
+                    // Dateien nicht im Log anzeigen (zu umfangreich)
+                    if (!(value instanceof File)) {
+                        formFields[key] = value;
+                    } else {
+                        formFields[key] = `Datei: ${value.name} (${this.formatFileSize(value.size)})`;
+                    }
+                }
+                console.log('MailSender: Gesammelte Formulardaten:', formFields);
                 console.log('MailSender: Sende an Endpoint:', this.config.endpoint);
             }
             
-            this.sendMail(formData, form);
+            // Dateien validieren, wenn vorhanden
+            const fileInputs = form.querySelectorAll('input[type="file"]');
+            if (fileInputs.length > 0) {
+                for (const fileInput of fileInputs) {
+                    if (fileInput.files.length > 0) {
+                        const isValid = this.validateFiles(fileInput.files);
+                        if (!isValid) {
+                            return false; // Abbrechen, wenn Dateien ungültig sind
+                        }
+                    }
+                }
+            }
+            
+            this.sendMailWithFiles(formDataObj, form);
         } catch (error) {
             console.error('MailSender: Fehler beim Verarbeiten des Formulars', error);
             // Fallback, falls ein Fehler auftritt
@@ -103,7 +128,6 @@ class MailSender {
             }
         }
         
-        // Nochmals sicherstellen, dass das Formular nicht abgesendet wird
         return false;
     }
 
@@ -139,7 +163,124 @@ class MailSender {
         return formData;
     }
 
+    // Neue Methode zur Validierung von Dateien
+    validateFiles(files) {
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            // Dateigröße überprüfen
+            if (file.size > this.config.maxFileSize) {
+                const maxSizeMB = this.config.maxFileSize / (1024 * 1024);
+                alert(`Die Datei "${file.name}" ist zu groß. Maximale Größe: ${maxSizeMB}MB`);
+                return false;
+            }
+            
+            // Dateityp überprüfen
+            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+            if (!this.config.allowedFileTypes.includes(fileExtension)) {
+                alert(`Der Dateityp "${fileExtension}" ist nicht erlaubt. Erlaubte Typen: ${this.config.allowedFileTypes.join(', ')}`);
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    // Hilfsmethode zum Formatieren der Dateigröße
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
     sendMail(formData, form) {
+        // Wenn es keine Datei-Inputs gibt, verwende die alte Methode
+        const fileInputs = form.querySelectorAll('input[type="file"]');
+        if (fileInputs.length === 0) {
+            // Status-Indikator setzen
+            this.updateFormStatus(form, 'sending', 'Nachricht wird gesendet...');
+            
+            if (this.config.debug) {
+                console.log('MailSender: Sende Daten an', this.config.endpoint, formData);
+            }
+            
+            // Senden mit Fetch API
+            fetch(this.config.endpoint, {
+                method: this.config.method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(formData),
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (this.config.debug) {
+                    console.log('MailSender: Server-Antwort erhalten', response);
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`Server antwortet mit Statuscode ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Debug-Informationen anzeigen
+                if (this.config.debug) {
+                    console.log('MailSender: Antwort-Daten', data);
+                }
+                
+                // Erfolgreiche Antwort
+                this.updateFormStatus(form, 'success', 'Ihre Nachricht wurde erfolgreich gesendet!');
+                
+                // Formular nur zurücksetzen, wenn resetFormOnSuccess true ist
+                if (this.config.resetFormOnSuccess) {
+                    form.reset();
+                    if (this.config.debug) {
+                        console.log('MailSender: Formular zurückgesetzt nach erfolgreichem Senden');
+                    }
+                } else if (this.config.debug) {
+                    console.log('MailSender: Formular bleibt nach erfolgreichem Senden erhalten (resetFormOnSuccess: false)');
+                }
+                
+                if (this.config.debug) {
+                    console.log('MailSender: E-Mail erfolgreich gesendet', data);
+                }
+            })
+            .catch(error => {
+                // Fehlerbehandlung
+                console.error('MailSender: Fehler beim Senden der Anfrage', error);
+                this.updateFormStatus(form, 'error', 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
+                
+                // Formular nur zurücksetzen, wenn resetFormOnFailure true ist
+                if (this.config.resetFormOnFailure) {
+                    form.reset();
+                    if (this.config.debug) {
+                        console.log('MailSender: Formular zurückgesetzt nach fehlgeschlagenem Senden');
+                    }
+                } else if (this.config.debug) {
+                    console.log('MailSender: Formular bleibt nach fehlgeschlagenem Senden erhalten (resetFormOnFailure: false)');
+                }
+                
+                // Fallback: Mailto-Link öffnen, wenn Server-Senden fehlschlägt
+                if (this.config.fallbackToMailto) {
+                    this.openMailtoFallback(formData);
+                }
+            });
+        } else {
+            // Bei Datei-Inputs, FormData erstellen und die neue Methode verwenden
+            const formDataObj = new FormData(form);
+            for (const key in formData) {
+                formDataObj.append(key, formData[key]);
+            }
+            this.sendMailWithFiles(formDataObj, form);
+        }
+    }
+
+    // Neue Methode zum Senden von Formulardaten mit Dateien
+    sendMailWithFiles(formData, form) {
         // Feedback-Element für Screenreader finden
         const feedbackElement = document.getElementById('form-feedback') || 
                                form.querySelector('[aria-live]') || 
@@ -149,18 +290,15 @@ class MailSender {
         this.updateFormStatus(form, 'sending', 'Nachricht wird gesendet...');
         
         if (this.config.debug) {
-            console.log('MailSender: Sende Daten an', this.config.endpoint, formData);
+            console.log('MailSender: Sende Daten mit Dateien an', this.config.endpoint);
         }
         
-        // Senden mit Fetch API
+        // Senden mit Fetch API mit FormData (unterstützt Dateien)
         fetch(this.config.endpoint, {
             method: this.config.method,
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify(formData),
+            body: formData, // FormData direkt verwenden
             credentials: 'same-origin'
+            // Wichtig: Keine Content-Type Header setzen, da FormData automatisch 'multipart/form-data' verwendet
         })
         .then(response => {
             if (this.config.debug) {
@@ -212,7 +350,7 @@ class MailSender {
             
             // Fallback: Mailto-Link öffnen, wenn Server-Senden fehlschlägt
             if (this.config.fallbackToMailto) {
-                this.openMailtoFallback(formData);
+                this.openMailtoFallback(this.scanFormFields(form));
             }
         });
     }

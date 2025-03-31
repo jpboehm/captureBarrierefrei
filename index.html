@@ -75,7 +75,22 @@
                     <div id="optin-error" class="error-message" aria-live="polite"></div>
                 </div>
 
-
+                <div class="form-group">
+                    <label for="upload">Datei-Upload</label>
+                    <input type="file" id="upload" name="upload" accept=".jpg, .jpeg, .png, .pdf" aria-required="true" 
+                           aria-invalid="false" aria-describedby="upload-error">
+                    <div id="upload-error" class="error-message" aria-live="polite"></div>
+                    <p class="file-size-info">Maximale Dateigröße: 5 MB</p>
+                    <p class="file-type-info">Erlaubte Dateitypen: JPG, JPEG, PNG, PDF</p>
+                    <p class="file-upload-info">Bitte laden Sie nur Dateien hoch, die für uns relevant sind.</p>
+                
+                    <p class="file-upload-note">Hinweis: Der Upload kann je nach Dateigröße einige Zeit in Anspruch nehmen.</p>
+                    <p class="file-upload-privacy">Wir behandeln Ihre Daten vertraulich und geben sie nicht an Dritte weiter.</p>
+                    <p class="file-upload-security">Sicherheitshinweis: Ihre Daten werden über eine sichere Verbindung übertragen.</p>
+                    <p class="file-upload-privacy">Datenschutz: Ihre Daten werden gemäß unserer Datenschutzrichtlinie behandelt.</p>
+                    <p class="file-upload-security">Sicherheitshinweis: Ihre Daten werden über eine sichere Verbindung übertragen.</p>               
+                </div>
+                
                 <div class="form-group">
                     <label for="email">E-Mail</label>
                     <input type="email" id="email" name="email" placeholder="Ihre E-Mail-Adresse" required aria-required="true" 
