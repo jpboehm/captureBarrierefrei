@@ -1,0 +1,106 @@
+:root{
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: clamp(16px, 1rem, 24px); /* Clamp gibt ein Minimum 16px, 1rem, 32px */
+  line-height: 1.5;
+}
+
+h1{
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+p{
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 576px){
+  h1{
+      font-size: 3rem;
+  }
+}
+
+
+
+/* Fokus-Styles für Tastaturnavigation */
+:focus {
+outline: 3px solid #4d90fe;
+outline-offset: 2px;
+}
+
+/* Skip-Link - normalerweise versteckt, aber sichtbar beim Fokussieren */
+.skip-link {
+position: absolute;
+top: -40px;
+left: 0;
+background: #000;
+color: white;
+padding: 8px;
+z-index: 100;
+transition: top 0.3s;
+}
+
+.skip-link:focus {
+top: 0;
+}
+
+/* Allgemeine Struktur und Zugänglichkeit */
+body {
+margin: 0;
+padding: 20px;
+}
+
+
+
+nav ul {
+list-style: none;
+padding: 0;
+display: flex;
+flex-wrap: wrap;
+gap: 10px;
+}
+
+nav a {
+padding: 8px 16px;
+display: inline-block;
+color: #333;
+background-color: #f0f0f0;
+border-radius: 4px;
+}
+
+nav a:hover, nav a:focus {
+background-color: #ddd;
+}
+
+/* Formular */
+label {
+display: block;
+margin-bottom: 5px;
+}
+
+input {
+padding: 8px;
+border: 1px solid #ccc;
+border-radius: 4px;
+}
+
+button {
+padding: 8px 16px;
+background-color: #4d90fe;
+color: white;
+border: none;
+border-radius: 4px;
+cursor: pointer;
+}
+
+button:hover, button:focus {
+background-color: #357ae8;
+}
+.error, .hint{
+display: none;
+}
+
+
+:user-invalid ~ p.error {display:block;}
+:focus ~ p.hint {display:block;}
+:blur ~ p.hint {display:none;}
