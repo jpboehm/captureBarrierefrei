@@ -35,6 +35,18 @@
                 <div id="form-feedback" class="sr-only" aria-live="assertive"></div>
                 
                 <div class="form-group">
+                   <label for="berufswahl" style="display: none;" >Dropdown</label>
+                     <select id="berufswahl" name="berufswahl" aria-required="true" aria-invalid="false" 
+                            aria-describedby="berufswahl-error">
+                          <option value="" disabled selected>Bitte wählen Sie einen Beruf</option>
+                          <option value="webentwickler">Webentwickler</option>
+                          <option value="grafikdesigner">Grafikdesigner</option>
+                          <option value="ux-designer">UX-Designer</option>
+                     </select>
+                        <div id="berufswahl-error" class="error-message" aria-live="polite"></div>
+                </div>
+
+                <div class="form-group">
                     <label for="name">Name</label>
                     <input type="text" id="name" name="name" placeholder="name" required aria-required="true" 
                            aria-invalid="false" aria-describedby="name-error">
@@ -90,104 +102,27 @@
         </nav>
     </footer>
 
-    <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
-    <script src="assets/js/mailSender.js"></script>
-    <script>
-        // Warte bis die Seite vollständig geladen ist
-        document.addEventListener('DOMContentLoaded', function() {
-            // Konfiguration für CaptureBarriereFrei
-            const captureConfig = { 
-                formSelectors: 'form.protected',  // Nur bestimmte Formulare schützen 
-                minTimeToFill: 3000,              // Mindestzeit zum Ausfüllen (ms) 
-                thresholdScore: 10,               // Erforderlicher Mindest-Score (vorher requiredScore)
-                enableLogging: false               // Debug-Modus aktivieren (vorher debug)
-            }; 
-            
-            // Globale Instanz verwenden statt eine neue zu erstellen
-            if (window.captureBarriereFreiInstance) {
-                // Bestehende Instanz rekonfigurieren
-                Object.assign(window.captureBarriereFreiInstance.config, captureConfig);
-                console.log('CaptureBarriereFrei: Bestehende Instanz rekonfiguriert');
-            } else {
-                // Neue Instanz erstellen nur wenn nötig
-                window.captureBarriereFreiInstance = new CaptureBarriereFrei(captureConfig);
-                console.log('CaptureBarriereFrei: Neue Instanz erstellt');
-            }
-            
-            // Konfiguration für den MailSender - mit Verzögerung initialisieren, 
-            // WICHTIG: MailSender MUSS nach CaptureBarriereFrei initialisiert werden
-            setTimeout(() => {
-                const mailConfig = {
-                    recipient: 'moin@jpboehm.de',  // Empfänger-E-Mail-Adresse
-                    subject: 'Neue Nachricht vom Kontaktformular',
-                    formSelector: '#kontaktFormular',  // Nur dieses Formular verwenden
-                    endpoint: 'send_mail.php',         // PHP-Endpunkt für mail()-Funktion
-                    method: 'POST',                    // Methode explizit setzen
-                    fallbackToMailto: false,           // Bei Fehlern auf mailto: ausweichen
-                    debug: true,                       // Debug-Modus aktivieren
-                    preserveFormHandlers: false,       // Erhält vorhandene Event-Handler
-                    resetFormOnSuccess: true,          // Formular nur bei erfolgreichem Absenden leeren
-                    resetFormOnFailure: false,         // Formular nicht leeren, wenn Absenden fehlschlägt
-                    useTemplates: true                 // Templates aus dem templates-Ordner verwenden
-                };
-                
-                // MailSender initialisieren
-                const mailSender = new MailSender(mailConfig);
-                
-                // Wenn Templates verwendet werden sollen, die Template-Konfiguration laden
-                if (mailConfig.useTemplates) {
-                    // Template-Konfiguration setzen
-                    mailSender.setTemplates({
-                        templates: {
-                            'kontakt': {
-                                subject: 'Neue Anfrage: {{vorname}} {{name}}',
-                                // Template aus Datei laden
-                                body: loadTemplate('contact.html'),
-                                // Dynamische Generierung aktivieren
-                                dynamicBody: true,
-                                attachments: true,
-                                confirmation: {
-                                    enabled: true,
-                                    subject: 'Ihre Anfrage bei Capture Barrierefrei',
-                                    body: loadTemplate('confirmation.html'),
-                                    // Dynamische Generierung für Bestätigungsmail aktivieren
-                                    dynamicBody: true
-                                }
-                            }
-                        },
-                        functions: {
-                            date: () => new Date().toLocaleDateString('de-DE'),
-                            time: () => new Date().toLocaleTimeString('de-DE'),
-                            year: () => new Date().getFullYear().toString(),
-                            referenceNumber: () => 'REF-' + Math.random().toString(36).substr(2, 9).toUpperCase()
-                        },
-                        defaults: {
-                            nachricht: '[Keine Nachricht angegeben]',
-                            telefon: '[Keine Telefonnummer angegeben]'
-                        }
-                    });
-                }
-            }, 1000);
-        });
+    <!--    Skripte für die Funktionalität 
+            Folgende Skripte sind erforderlich:
+            - captureBarriereFrei.js: Hauptskript für die Formularverarbeitung
+            - mailSender.js: Skript für den E-Mail-Versand
+            - config.js: Konfiguration und Initialisierung
 
-        /**
-         * Lädt ein E-Mail-Template aus einer Datei
-         * @param {string} templateName - Der Name der Template-Datei ohne Pfad
-         * @returns {string} - Der Inhalt des Templates
-         */
-        function loadTemplate(templateName) {
-            // In der Browser-Umgebung: Template per AJAX laden
-            const xhr = new XMLHttpRequest();
-            xhr.open('GET', `/templates/${templateName}`, false); // Synchroner Request
-            xhr.send();
-            
-            if (xhr.status === 200) {
-                return xhr.responseText;
-            } else {
-                console.error(`Template ${templateName} konnte nicht geladen werden.`);
-                return '';
-            }
-        }
+            Die Skripte sind in der Reihenfolge geladen, in der sie benötigt werden. wichtig sie müssen als module geladen werden,
+            da sie ES6-Module sind.
+    -->
+    <!-- Module-Scripts -->
+    <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
+    <script type="module" src="assets/js/mailSender/index.js"></script>
+    
+    <!-- Konfiguration und Initialisierung -->
+    <script src="assets/js/config.js"></script>
+    <script>
+        // Einfache Initialisierung, wenn die Seite geladen ist
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formular mit den vordefinierten Einstellungen initialisieren
+            window.FormularKonfiguration.initialisiere();
+        });
     </script>
-    </body>
+</body>
 </html>
