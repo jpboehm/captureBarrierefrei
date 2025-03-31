@@ -12,7 +12,9 @@ class MailSender {
             endpoint: '/send_mail.php', // Server-Endpunkt für das Senden
             method: 'POST',
             debug: false,
-            preserveFormHandlers: false, // NEU: Option zum Erhalten vorhandener Handlers
+            preserveFormHandlers: false, // Option zum Erhalten vorhandener Handlers
+            resetFormOnSuccess: true,    // Formular nur bei Erfolg zurücksetzen
+            resetFormOnFailure: false,   // Formular bei Fehlern nicht zurücksetzen
             ...config // Überschreibe mit benutzerdefinierten Einstellungen
         };
 
@@ -178,7 +180,16 @@ class MailSender {
             
             // Erfolgreiche Antwort
             this.updateFormStatus(form, 'success', 'Ihre Nachricht wurde erfolgreich gesendet!');
-            form.reset();
+            
+            // Formular nur zurücksetzen, wenn resetFormOnSuccess true ist
+            if (this.config.resetFormOnSuccess) {
+                form.reset();
+                if (this.config.debug) {
+                    console.log('MailSender: Formular zurückgesetzt nach erfolgreichem Senden');
+                }
+            } else if (this.config.debug) {
+                console.log('MailSender: Formular bleibt nach erfolgreichem Senden erhalten (resetFormOnSuccess: false)');
+            }
             
             if (this.config.debug) {
                 console.log('MailSender: E-Mail erfolgreich gesendet', data);
@@ -188,6 +199,16 @@ class MailSender {
             // Fehlerbehandlung
             console.error('MailSender: Fehler beim Senden der Anfrage', error);
             this.updateFormStatus(form, 'error', 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
+            
+            // Formular nur zurücksetzen, wenn resetFormOnFailure true ist
+            if (this.config.resetFormOnFailure) {
+                form.reset();
+                if (this.config.debug) {
+                    console.log('MailSender: Formular zurückgesetzt nach fehlgeschlagenem Senden');
+                }
+            } else if (this.config.debug) {
+                console.log('MailSender: Formular bleibt nach fehlgeschlagenem Senden erhalten (resetFormOnFailure: false)');
+            }
             
             // Fallback: Mailto-Link öffnen, wenn Server-Senden fehlschlägt
             if (this.config.fallbackToMailto) {

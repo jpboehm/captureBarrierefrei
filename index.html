@@ -142,14 +142,16 @@
                     formSelector: '#kontaktFormular',  // Nur dieses Formular verwenden
                     endpoint: 'send_mail.php',         // PHP-Endpunkt für mail()-Funktion
                     method: 'POST',                    // Methode explizit setzen
-                    fallbackToMailto: true,           // Bei Fehlern auf mailto: ausweichen
-                    debug: true,                      // Debug-Modus aktivieren
-                    preserveFormHandlers: true        // NEU: Erhält vorhandene Event-Handler
+                    fallbackToMailto: false,           // Bei Fehlern auf mailto: ausweichen
+                    debug: true,                       // Debug-Modus aktivieren
+                    preserveFormHandlers: false,       // Erhält vorhandene Event-Handler
+                    resetFormOnSuccess: true,          // Formular nur bei erfolgreichem Absenden leeren
+                    resetFormOnFailure: false          // Formular nicht leeren, wenn Absenden fehlschlägt
                 };
                 
                 // MailSender initialisieren
                 const mailSender = new MailSender(mailConfig);
-            }, 500);
+            }, 1000);
         });
     </script>
     </body>
