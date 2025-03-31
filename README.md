@@ -36,6 +36,46 @@ CaptureBarriereFrei bietet eine innovative, vollständig barrierefreie Alternati
 
 3. Konfiguration anpassen (siehe nächster Abschnitt)
 
+### Projektstruktur
+
+Das Projekt ist folgendermaßen organisiert:
+
+```
+mailTest/
+├── assets/
+│   ├── css/
+│   │   └── style.css                    # Zentrale Styling-Datei
+│   ├── js/
+│   │   ├── captureBarriereFrei/         # Modul 1: Bot-Schutz
+│   │   │   ├── botDetection.js          # Verhaltensanalyse-Logik
+│   │   │   ├── core.js                  # Kernfunktionalität
+│   │   │   ├── formProtection.js        # Formularschutz-Mechanismen
+│   │   │   ├── formValidation.js        # Validierungsfunktionen
+│   │   │   ├── index.js                 # Modul-Einstiegspunkt
+│   │   │   ├── logger.js                # Logging-Funktionalität
+│   │   │   ├── ui.js                    # UI-Komponenten
+│   │   │   └── utils.js                 # Hilfsfunktionen
+│   │   ├── config.js                    # Zentrale Konfigurationsdatei
+│   │   └── mailSender/                  # Modul 2: E-Mail-Versand
+│   │       ├── core/
+│   │       │   ├── ConfigManager.js     # Konfigurationsverwaltung
+│   │       │   └── MailSender.js        # Hauptklasse für den E-Mail-Versand
+│   │       ├── index.js                 # Modul-Einstiegspunkt
+│   │       └── utils/
+│   │           ├── ajaxHandler.js       # AJAX-Kommunikation
+│   │           ├── fileValidator.js     # Dateivalidierung
+│   │           ├── formUtils.js         # Formularhelfer
+│   │           └── templateEngine.js    # E-Mail-Template-Verarbeitung
+│   ├── php/
+│   │   └── send_mail.php                # Backend für E-Mail-Versand
+│   └── templates/
+│       ├── confirmation.html            # Bestätigungs-E-Mail-Vorlage
+│       └── contact.html                 # Kontaktformular-E-Mail-Vorlage
+├── index.html                           # Beispielseite mit Formular
+├── mail_diagnose.php                    # Tool zur Mail-Funktionsdiagnose
+└── README.md                            # Projektdokumentation
+```
+
 ## Konfiguration
 
 Die Konfiguration erfolgt über die zentrale Datei `assets/js/config.js`. Hier werden alle Einstellungen für beide Module definiert:
@@ -76,7 +116,7 @@ Die detaillierten Konfigurationsoptionen werden automatisch in der `erstelleModu
 <body>
     <!-- Formular mit der Klasse "protected" für automatischen Bot-Schutz -->
     <form id="kontaktFormular" method="post" class="protected">
-        <!-- Formularfelder -->
+        <!-- Formularfelder können beliebig angepasst und erweitert werden -->
         <div class="form-group">
             <label for="name">Name</label>
             <input type="text" id="name" name="name" required>
@@ -109,8 +149,9 @@ Die detaillierten Konfigurationsoptionen werden automatisch in der `erstelleModu
 
     <!-- Script-Einbindung -->
     <script src="assets/js/config.js"></script>
+    <!-- Module als ES6-Module einbinden -->
     <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
-    <script src="assets/js/mailSender.js"></script>
+    <script type="module" src="assets/js/mailSender/index.js"></script>
     <script>
         // Initialisierung starten, wenn das DOM geladen ist
         document.addEventListener('DOMContentLoaded', function() {
@@ -121,6 +162,8 @@ Die detaillierten Konfigurationsoptionen werden automatisch in der `erstelleModu
 </body>
 </html>
 ```
+
+> **Hinweis zur Formulargestaltung**: Das HTML-Formular kann beliebig angepasst und mit zusätzlichen Feldern erweitert werden. Die Module lesen alle vorhandenen Formularfelder dynamisch aus und verarbeiten diese automatisch. Achten Sie lediglich darauf, jedem Feld eine eindeutige ID und einen Namen zuzuweisen.
 
 ## Modul 1: CaptureBarriereFrei - Intelligente Bot-Erkennung
 
@@ -379,7 +422,7 @@ function loadEmailTemplate($templateName, $variables) {
 
 <!-- Formular mit Schutzkennzeichnung -->
 <form id="kontaktFormular" method="post" class="protected">
-    <!-- Strukturierte Formularsektionen -->
+    <!-- Strukturierte Formularsektionen - können beliebig angepasst werden -->
     <div class="form-group">
         <label for="name">Name</label>
         <input type="text" id="name" name="name" required>
@@ -399,12 +442,12 @@ function loadEmailTemplate($templateName, $variables) {
 
     <!--    Skripte für die Funktionalität 
             Folgende Skripte sind erforderlich:
-            - captureBarriereFrei.js: Hauptskript für die Formularverarbeitung
-            - mailSender.js: Skript für den E-Mail-Versand
+            - captureBarriereFrei/index.js: Hauptskript für die Formularverarbeitung
+            - mailSender/index.js: Skript für den E-Mail-Versand
             - config.js: Konfiguration und Initialisierung
 
-            Die Skripte sind in der Reihenfolge geladen, in der sie benötigt werden. wichtig sie müssen als module geladen werden,
-            da sie ES6-Module sind.
+            Die Skripte sind in der Reihenfolge geladen, in der sie benötigt werden.
+            Wichtig: Sie müssen als ES6-Module geladen werden.
     -->
     <!-- Module-Scripts -->
     <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
@@ -417,7 +460,7 @@ function loadEmailTemplate($templateName, $variables) {
         document.addEventListener('DOMContentLoaded', function() {
             // Formular mit den vordefinierten Einstellungen initialisieren
             window.FormularKonfiguration.initialisiere();
-        });c
+        });
     </script>
 ```
 
@@ -457,6 +500,31 @@ Die sauberste Methode zur Anpassung ist die Bearbeitung der `config.js`. Für fo
 Die Darstellung lässt sich über CSS individualisieren:
 - `assets/css/style.css` - Zentrale Styling-Datei
 - UI-Komponenten - Individuelle Anpassungen der Interaktionselemente
+
+### Formularanpassungen
+
+Das System ist so konzipiert, dass es mit beliebigen Formularstrukturen arbeitet:
+
+- Sie können jede Art von Formularfeld hinzufügen (Input, Select, Textarea, etc.)
+- Alle Felder werden automatisch ausgelesen und in die E-Mail übernommen
+- Formularlabels werden intelligent erkannt und für die Strukturierung der E-Mail verwendet
+- Dateiuploads werden unterstützt und automatisch als Anhänge verarbeitet
+- Bestehende Validierungsattribute (required, pattern, etc.) werden respektiert
+
+Beispiel für ein erweitertes Formularfeld:
+
+```html
+<div class="form-group">
+    <label for="anfrage-typ">Art der Anfrage</label>
+    <select id="anfrage-typ" name="anfrage-typ" required aria-required="true">
+        <option value="" disabled selected>Bitte wählen</option>
+        <option value="allgemein">Allgemeine Anfrage</option>
+        <option value="angebot">Angebotsanfrage</option>
+        <option value="support">Technischer Support</option>
+    </select>
+    <div id="anfrage-typ-error" class="error-message" aria-live="polite"></div>
+</div>
+```
 
 ### Funktionale Erweiterungen
 
