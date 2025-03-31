@@ -292,7 +292,8 @@ Dieses Projekt ist unter der MIT-Lizenz lizenziert - siehe die LICENSE.md-Datei 
 
 ## Mitwirkende
 
-- [Ihr Name] - Initialer Autor und Maintainer
+- JP. Böhm - Initialer Autor und Maintainer 
+- Claude 3.7 Sonnet Thinking (Struktur + botDetection.js )
 
 ## Danksagungen
 
