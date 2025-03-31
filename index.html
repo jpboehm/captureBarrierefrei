@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <title>capture Barrierefrei - Kontaktformular</title>
+</head>
+
+<body>
+    <!-- Skip-Link für Tastaturnutzer (WCAG 2.4.1) -->
+    <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+    
+    <header role="banner">
+        <!-- Standard Header-Bereich mit Navigation */ -->
+        <h1>Kontakt</h1>
+        <nav aria-label="Hauptnavigation">
+            <ul>
+                <li><a href="index.html">Startseite</a></li>
+                <li><a href="#" aria-current="page">Kontakt</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="main-content" role="main" tabindex="-1">
+        <section aria-labelledby="form-heading">
+            <h2 id="form-heading">Kontaktformular</h2>
+            <p>Bitte füllen Sie das Formular aus, um uns zu kontaktieren.</p>
+            
+            <div class="security-notice" aria-live="polite">
+                <p id="security-message">Aus Sicherheitsgründen führen wir im Hintergrund eine automatische Prüfung durch, um sicherzustellen, dass Sie kein Bot sind. Ihre Privatsphäre bleibt dabei geschützt.</p>
+            </div>
+
+            <form id="kontaktFormular" method="post" novalidate aria-describedby="form-feedback" class="protected">
+                <div id="form-feedback" class="sr-only" aria-live="assertive"></div>
+                
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="name" required aria-required="true" 
+                           aria-invalid="false" aria-describedby="name-error">
+                    <div id="name-error" class="error-message" aria-live="polite"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="vorname">Vorname</label>
+                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required aria-required="true" 
+                           aria-invalid="false" aria-describedby="vorname-error">
+                    <div id="vorname-error" class="error-message" aria-live="polite"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="telefon">Telefon</label>
+                    <input type="tel" id="telefon" name="telefon" placeholder="Ihre Telefonnummer" required aria-required="true" 
+                           aria-invalid="false" aria-describedby="telefon-error">
+                    <div id="telefon-error" class="error-message" aria-live="polite"></div>
+                </div>
+                <div class="form-group">
+
+                    <label for="optin">Opt-in</label>
+                    <div>
+                        <input type="radio" id="optin1" name="optin" value="option1" required aria-required="true" 
+                               aria-invalid="false" aria-describedby="optin-error">
+                        <label for="optin1">Option 1</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="optin2" name="optin" value="option2" required aria-required="true" 
+                               aria-invalid="false" aria-describedby="optin-error">
+                        <label for="optin2">Option 2</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="optin3" name="optin" value="option3" required aria-required="true" 
+                               aria-invalid="false" aria-describedby="optin-error">
+                        <label for="optin3">Option 3</label>
+                    </div>
+                    <div id="optin-error" class="error-message" aria-live="polite"></div>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="email">E-Mail</label>
+                    <input type="email" id="email" name="email" placeholder="Ihre E-Mail-Adresse" required aria-required="true" 
+                           aria-invalid="false" aria-describedby="email-error">
+                    <div id="email-error" class="error-message" aria-live="polite"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nachricht">Nachricht</label>
+                    <textarea id="nachricht" name="nachricht" placeholder="Ihre Nachricht" required aria-required="true"
+                              aria-invalid="false" aria-describedby="nachricht-error"></textarea>
+                    <div id="nachricht-error" class="error-message" aria-live="polite"></div>
+                </div>              
+
+                <div class="form-actions">
+                    <button type="submit" id="submit-button">Absenden</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer role="contentinfo">
+        <!-- Standard Footer-Bereich */ -->
+        <p>&copy; 2023 Capture Barrierefrei. Alle Rechte vorbehalten.</p>
+        <nav aria-label="Fußzeilennavigation">
+            <ul>
+                <li><a href="#">Impressum</a></li>
+                <li><a href="#">Datenschutz</a></li>
+                <li><a href="#">Barrierefreiheitserklärung</a></li>
+            </ul>
+        </nav>
+    </footer>
+
+    <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
+    <script src="assets/js/mailSender.js"></script>
+    <script>
+        // Warte bis die Seite vollständig geladen ist
+        document.addEventListener('DOMContentLoaded', function() {
+            // Konfiguration für CaptureBarriereFrei
+            const captureConfig = { 
+                formSelectors: 'form.protected',  // Nur bestimmte Formulare schützen 
+                minTimeToFill: 3000,              // Mindestzeit zum Ausfüllen (ms) 
+                thresholdScore: 10,               // Erforderlicher Mindest-Score (vorher requiredScore)
+                enableLogging: true               // Debug-Modus aktivieren (vorher debug)
+            }; 
+            
+            // Globale Instanz verwenden statt eine neue zu erstellen
+            if (window.captureBarriereFreiInstance) {
+                // Bestehende Instanz rekonfigurieren
+                Object.assign(window.captureBarriereFreiInstance.config, captureConfig);
+                console.log('CaptureBarriereFrei: Bestehende Instanz rekonfiguriert');
+            } else {
+                // Neue Instanz erstellen nur wenn nötig
+                window.captureBarriereFreiInstance = new CaptureBarriereFrei(captureConfig);
+                console.log('CaptureBarriereFrei: Neue Instanz erstellt');
+            }
+            
+            // Konfiguration für den MailSender - mit Verzögerung initialisieren, 
+            // WICHTIG: MailSender MUSS nach CaptureBarriereFrei initialisiert werden
+            setTimeout(() => {
+                const mailConfig = {
+                    recipient: 'moin@jpboehm.de',  // Empfänger-E-Mail-Adresse
+                    subject: 'Neue Nachricht vom Kontaktformular',
+                    formSelector: '#kontaktFormular',  // Nur dieses Formular verwenden
+                    endpoint: 'send_mail.php',         // PHP-Endpunkt für mail()-Funktion
+                    method: 'POST',                    // Methode explizit setzen
+                    fallbackToMailto: true,           // Bei Fehlern auf mailto: ausweichen
+                    debug: true,                      // Debug-Modus aktivieren
+                    preserveFormHandlers: true        // NEU: Erhält vorhandene Event-Handler
+                };
+                
+                // MailSender initialisieren
+                const mailSender = new MailSender(mailConfig);
+            }, 500);
+        });
+    </script>
+    </body>
+</html>
