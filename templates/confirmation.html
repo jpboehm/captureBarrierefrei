@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bestätigung Ihrer Anfrage</title>
+    <style>
+        /* Basis-Styling für E-Mail-Clients */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        
+        /* Container mit maximaler Breite für bessere Lesbarkeit */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header-Styling */
+        .header {
+            background-color: #4a86e8;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        /* Logo-Platzhalter */
+        .logo {
+            max-width: 150px;
+            margin-bottom: 10px;
+        }
+        
+        /* Inhaltsbereich */
+        .content {
+            padding: 20px;
+            background-color: #ffffff;
+        }
+        
+        /* Hervorgehobener Bereich */
+        .highlight {
+            background-color: #f0f7ff;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        /* Call-to-Action Button */
+        .button {
+            display: inline-block;
+            background-color: #4a86e8;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        /* Footer-Bereich */
+        .footer {
+            background-color: #f2f2f2;
+            padding: 15px;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+        }
+        
+        /* Soziale Medien Icons */
+        .social-icons {
+            margin-top: 15px;
+        }
+        
+        .social-icon {
+            display: inline-block;
+            margin: 0 5px;
+        }
+        
+        /* Responsive Anpassungen */
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+            }
+            .content {
+                padding: 10px !important;
+            }
+            .button {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- Falls ein Logo verwendet werden soll -->
+            <!-- <img src="{{logoUrl}}" alt="Unternehmenslogo" class="logo"> -->
+            <h1>Vielen Dank für Ihre Anfrage!</h1>
+        </div>
+        
+        <div class="content">
+            <p>Hallo {{vorname}} {{name}},</p>
+            
+            <p>vielen Dank für Ihre Nachricht. Wir haben Ihre Anfrage erhalten und werden uns so schnell wie möglich bei Ihnen melden.</p>
+            
+            <div class="highlight">
+                <p><strong>Referenznummer:</strong> {{referenceNumber}}</p>
+                <p><strong>Zeitpunkt der Anfrage:</strong> {{date}} um {{time}} Uhr</p>
+            </div>
+            
+            <p>Bitte bewahren Sie diese E-Mail für Ihre Unterlagen auf. Falls Sie weitere Fragen haben, können Sie gerne auf diese E-Mail antworten oder uns unter der unten angegebenen Telefonnummer kontaktieren.</p>
+            
+            <!-- Optional: Call-to-Action Button -->
+            <a href="{{websiteUrl}}" class="button">Besuchen Sie unsere Website</a>
+            
+            <p>Mit freundlichen Grüßen,<br>
+            Ihr Capture Barrierefrei Team</p>
+            
+            <!-- Kontaktinformationen -->
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #eeeeee;">
+                <p><strong>Kontakt:</strong><br>
+                Capture Barrierefrei GmbH<br>
+                Musterstraße 123<br>
+                12345 Musterstadt<br>
+                Tel: 030 123456789<br>
+                E-Mail: info@example.com</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Diese E-Mail wurde automatisch generiert. Bitte antworten Sie nicht direkt auf diese Nachricht.</p>
+            
+            <!-- Optional: Social Media Icons -->
+            <div class="social-icons">
+                <a href="{{facebookUrl}}" class="social-icon">Facebook</a>
+                <a href="{{twitterUrl}}" class="social-icon">Twitter</a>
+                <a href="{{linkedinUrl}}" class="social-icon">LinkedIn</a>
+            </div>
+            
+            <p>© {{year}} Capture Barrierefrei. Alle Rechte vorbehalten.</p>
+            
+            <p><small>Sie erhalten diese E-Mail, weil Sie das Kontaktformular auf unserer Website ausgefüllt haben. Wenn Sie keine weiteren E-Mails von uns erhalten möchten, klicken Sie bitte <a href="{{unsubscribeUrl}}">hier</a>.</small></p>
+        </div>
+    </div>
+</body>
+</html>

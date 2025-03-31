@@ -83,17 +83,22 @@ $debug_info['received_data'] = $data;
 $recipient = isset($data['recipient']) ? $data['recipient'] : 'standard@beispiel.de';
 $subject = isset($data['subject']) ? $data['subject'] : 'Nachricht vom Kontaktformular';
 
-// Erstelle den E-Mail-Text
-$body = "Eine neue Nachricht vom Kontaktformular:\n\n";
-
-// Füge alle Formularfelder hinzu (außer recipient und subject)
-foreach ($data as $key => $value) {
-    if ($key !== 'recipient' && $key !== 'subject' && !strstr($key, '_info')) {
-        // Wenn es sich um ein Array handelt (z.B. bei select-multiple)
-        if (is_array($value)) {
-            $value = implode(', ', $value);
+// Erstelle den E-Mail-Text (benutze customBody wenn verfügbar)
+if (isset($data['customBody'])) {
+    $body = $data['customBody'];
+    $debug_info['using_template'] = true;
+} else {
+    $body = "Eine neue Nachricht vom Kontaktformular:\n\n";
+    
+    // Füge alle Formularfelder hinzu (außer recipient und subject und customBody)
+    foreach ($data as $key => $value) {
+        if ($key !== 'recipient' && $key !== 'subject' && $key !== 'customBody' && $key !== 'confirmation' && !strstr($key, '_info')) {
+            // Wenn es sich um ein Array handelt (z.B. bei select-multiple)
+            if (is_array($value)) {
+                $value = implode(', ', $value);
+            }
+            $body .= "$key: $value\n";
         }
-        $body .= "$key: $value\n";
     }
 }
 
@@ -112,7 +117,14 @@ try {
         
         // Nachricht mit Boundary beginnen
         $message = "--{$mime_boundary}\r\n";
-        $message .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        
+        // Setze Content-Type basierend darauf, ob HTML oder Text
+        if (strpos($body, '<html') !== false) {
+            $message .= "Content-Type: text/html; charset=UTF-8\r\n";
+        } else {
+            $message .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        }
+        
         $message .= "Content-Transfer-Encoding: 8bit\r\n\r\n";
         $message .= $body . "\r\n\r\n";
         
@@ -145,7 +157,13 @@ try {
         $headers .= "Reply-To: " . (isset($data['email']) ? $data['email'] : 'no-reply@beispiel.de') . "\r\n";
         $headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
         $headers .= "MIME-Version: 1.0\r\n";
-        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        
+        // Setze Content-Type basierend darauf, ob HTML oder Text
+        if (strpos($body, '<html') !== false) {
+            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        } else {
+            $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        }
         
         $message = $body;
         
@@ -162,12 +180,37 @@ try {
     $mail_sent = mail($recipient, $subject, $message, $headers);
     $debug_info['mail_sent'] = $mail_sent;
     
+    // Bestätigungs-E-Mail senden, falls konfiguriert
+    $confirmation_sent = false;
+    if ($mail_sent && isset($data['confirmation']) && !empty($data['confirmation']['recipient'])) {
+        $conf = $data['confirmation'];
+        $conf_headers = "From: webmaster@" . $_SERVER['SERVER_NAME'] . "\r\n";
+        $conf_headers .= "Reply-To: no-reply@" . $_SERVER['SERVER_NAME'] . "\r\n";
+        $conf_headers .= "X-Mailer: PHP/" . phpversion() . "\r\n";
+        $conf_headers .= "MIME-Version: 1.0\r\n";
+        
+        // Setze Content-Type basierend darauf, ob HTML oder Text
+        if (strpos($conf['body'], '<html') !== false) {
+            $conf_headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+        } else {
+            $conf_headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        }
+        
+        $confirmation_sent = mail($conf['recipient'], $conf['subject'], $conf['body'], $conf_headers);
+        $debug_info['confirmation_sent'] = $confirmation_sent;
+    }
+    
     // Debug-Informationen für mail()-Funktion
     $debug_info['mail_error'] = error_get_last();
     
     // Antworte mit dem Ergebnis
     if ($mail_sent) {
-        echo json_encode(['success' => true, 'message' => 'E-Mail erfolgreich gesendet', 'debug' => $debug_info]);
+        echo json_encode([
+            'success' => true, 
+            'message' => 'E-Mail erfolgreich gesendet', 
+            'confirmation_sent' => $confirmation_sent,
+            'debug' => $debug_info
+        ]);
     } else {
         http_response_code(500); // Internal Server Error
         echo json_encode(['success' => false, 'message' => 'E-Mail konnte nicht gesendet werden', 'debug' => $debug_info]);

@@ -17,8 +17,12 @@ class MailSender {
             resetFormOnFailure: false,   // Formular bei Fehlern nicht zurücksetzen
             maxFileSize: 5 * 1024 * 1024, // 5MB maximale Dateigröße
             allowedFileTypes: ['.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx'], // Erlaubte Dateitypen
+            useTemplates: true,         // Template-Unterstützung standardmäßig deaktiviert
             ...config // Überschreibe mit benutzerdefinierten Einstellungen
         };
+
+        // Template-Konfiguration initialisieren
+        this.templateConfig = null;
 
         // Endpoint prüfen und korrigieren (relativer Pfad)
         if (this.config.endpoint.startsWith('/')) {
@@ -196,6 +200,11 @@ class MailSender {
     }
 
     sendMail(formData, form) {
+        // Wenn Templates konfiguriert sind, wenden wir sie an
+        if (this.config.useTemplates && this.templateConfig) {
+            this.applyTemplates(formData, form);
+        }
+
         // Wenn es keine Datei-Inputs gibt, verwende die alte Methode
         const fileInputs = form.querySelectorAll('input[type="file"]');
         if (fileInputs.length === 0) {
@@ -389,6 +398,156 @@ class MailSender {
         }
         
         window.location.href = mailtoLink;
+    }
+
+    /**
+     * Setzt die Template-Konfiguration für E-Mails
+     * @param {Object} config - Konfigurationsobjekt für Templates
+     */
+    setTemplates(config) {
+        this.templateConfig = config;
+        
+        if (this.config.debug) {
+            console.log('MailSender: Template-Konfiguration gesetzt', config);
+        }
+    }
+
+    /**
+     * Wendet Template auf Formulardaten an
+     * @param {Object} formData - Die gesammelten Formulardaten
+     * @param {HTMLFormElement} form - Das Formular-Element
+     */
+    applyTemplates(formData, form) {
+        if (!this.templateConfig || !this.templateConfig.templates) {
+            if (this.config.debug) {
+                console.warn('MailSender: Keine Template-Konfiguration vorhanden');
+            }
+            return;
+        }
+
+        try {
+            // Standard-Template verwenden oder das erste in der Konfiguration
+            const templateName = form.dataset.template || Object.keys(this.templateConfig.templates)[0];
+            const templateConfig = this.templateConfig.templates[templateName];
+
+            if (!templateConfig) {
+                if (this.config.debug) {
+                    console.warn(`MailSender: Kein Template mit Namen "${templateName}" gefunden`);
+                }
+                return;
+            }
+
+            // Betreff aus Template mit Platzhaltern ersetzen
+            if (templateConfig.subject) {
+                formData.subject = this.replacePlaceholders(templateConfig.subject, formData);
+            }
+
+            // E-Mail-Body aus Template mit Platzhaltern ersetzen
+            if (templateConfig.body) {
+                formData.customBody = this.replacePlaceholders(templateConfig.body, formData);
+            }
+
+            // Generiere Bestätigungs-E-Mail falls konfiguriert
+            if (templateConfig.confirmation && templateConfig.confirmation.enabled) {
+                formData.confirmation = {
+                    recipient: formData.email || '',
+                    subject: this.replacePlaceholders(templateConfig.confirmation.subject, formData),
+                    body: this.replacePlaceholders(templateConfig.confirmation.body, formData)
+                };
+            }
+
+            if (this.config.debug) {
+                console.log('MailSender: Templates angewendet', {
+                    template: templateName,
+                    subject: formData.subject,
+                    hasCustomBody: !!formData.customBody,
+                    hasConfirmation: !!formData.confirmation
+                });
+            }
+        } catch (error) {
+            console.error('MailSender: Fehler bei der Anwendung von Templates', error);
+        }
+    }
+
+    /**
+     * Ersetzt Platzhalter im Template mit tatsächlichen Werten
+     * @param {string} template - Der Template-String
+     * @param {Object} data - Objekt mit Ersetzungswerten
+     * @returns {string} - Template mit ersetzten Platzhaltern
+     */
+    replacePlaceholders(template, data) {
+        let result = template;
+
+        // Einfache Platzhalter ersetzen {{variable}}
+        result = result.replace(/\{\{([^#\/][^}]*)\}\}/g, (match, key) => {
+            const trimmedKey = key.trim();
+            
+            // Prüfen ob es eine Funktion in der Template-Konfiguration gibt
+            if (this.templateConfig.functions && this.templateConfig.functions[trimmedKey]) {
+                return this.templateConfig.functions[trimmedKey]();
+            }
+            
+            // Sonst den Wert aus den Formulardaten oder einen Standardwert verwenden
+            const value = data[trimmedKey];
+            if (value !== undefined) {
+                return value;
+            } else if (this.templateConfig.defaults && this.templateConfig.defaults[trimmedKey]) {
+                return this.templateConfig.defaults[trimmedKey];
+            }
+            
+            // Wenn kein Wert gefunden wurde, Platzhalter entfernen
+            return '';
+        });
+
+        // Bedingte Blöcke verarbeiten {{#if variable}}...{{/if}}
+        result = this.processConditionalBlocks(result, data);
+
+        // Listen verarbeiten {{#each array}}...{{/each}}
+        if (data.attachments) {
+            result = this.processLoops(result, data);
+        }
+
+        return result;
+    }
+
+    /**
+     * Verarbeitet bedingte Blöcke im Template
+     * @param {string} template - Das Template
+     * @param {Object} data - Die Daten
+     * @returns {string} - Verarbeitetes Template
+     */
+    processConditionalBlocks(template, data) {
+        return template.replace(/\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, condition, content) => {
+            const trimmedCondition = condition.trim();
+            // Prüfen, ob der Wert existiert oder true ist
+            if (data[trimmedCondition]) {
+                return content;
+            }
+            return '';
+        });
+    }
+
+    /**
+     * Verarbeitet Schleifen im Template
+     * @param {string} template - Das Template
+     * @param {Object} data - Die Daten
+     * @returns {string} - Verarbeitetes Template
+     */
+    processLoops(template, data) {
+        return template.replace(/\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, arrayName, content) => {
+            const trimmedArrayName = arrayName.trim();
+            const array = data[trimmedArrayName];
+            
+            if (!Array.isArray(array)) {
+                return '';
+            }
+            
+            return array.map(item => {
+                return content.replace(/\{\{this\.([^}]+)\}\}/g, (m, key) => {
+                    return item[key] !== undefined ? item[key] : '';
+                });
+            }).join('');
+        });
     }
 }
 

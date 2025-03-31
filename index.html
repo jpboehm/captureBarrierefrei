@@ -49,47 +49,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="telefon">Telefon</label>
-                    <input type="tel" id="telefon" name="telefon" placeholder="Ihre Telefonnummer" required aria-required="true" 
-                           aria-invalid="false" aria-describedby="telefon-error">
-                    <div id="telefon-error" class="error-message" aria-live="polite"></div>
-                </div>
-                <div class="form-group">
-
-                    <label for="optin">Opt-in</label>
-                    <div>
-                        <input type="radio" id="optin1" name="optin" value="option1" required aria-required="true" 
-                               aria-invalid="false" aria-describedby="optin-error">
-                        <label for="optin1">Option 1</label>
-                    </div>
-                    <div>
-                        <input type="radio" id="optin2" name="optin" value="option2" required aria-required="true" 
-                               aria-invalid="false" aria-describedby="optin-error">
-                        <label for="optin2">Option 2</label>
-                    </div>
-                    <div>
-                        <input type="radio" id="optin3" name="optin" value="option3" required aria-required="true" 
-                               aria-invalid="false" aria-describedby="optin-error">
-                        <label for="optin3">Option 3</label>
-                    </div>
-                    <div id="optin-error" class="error-message" aria-live="polite"></div>
-                </div>
-
-                <div class="form-group">
                     <label for="upload">Datei-Upload</label>
                     <input type="file" id="upload" name="upload" accept=".jpg, .jpeg, .png, .pdf" aria-required="true" 
                            aria-invalid="false" aria-describedby="upload-error">
                     <div id="upload-error" class="error-message" aria-live="polite"></div>
                     <p class="file-size-info">Maximale Dateigröße: 5 MB</p>
                     <p class="file-type-info">Erlaubte Dateitypen: JPG, JPEG, PNG, PDF</p>
-                    <p class="file-upload-info">Bitte laden Sie nur Dateien hoch, die für uns relevant sind.</p>
-                
-                    <p class="file-upload-note">Hinweis: Der Upload kann je nach Dateigröße einige Zeit in Anspruch nehmen.</p>
-                    <p class="file-upload-privacy">Wir behandeln Ihre Daten vertraulich und geben sie nicht an Dritte weiter.</p>
-                    <p class="file-upload-security">Sicherheitshinweis: Ihre Daten werden über eine sichere Verbindung übertragen.</p>
-                    <p class="file-upload-privacy">Datenschutz: Ihre Daten werden gemäß unserer Datenschutzrichtlinie behandelt.</p>
-                    <p class="file-upload-security">Sicherheitshinweis: Ihre Daten werden über eine sichere Verbindung übertragen.</p>               
-                </div>
+              </div>
                 
                 <div class="form-group">
                     <label for="email">E-Mail</label>
@@ -161,13 +127,63 @@
                     debug: true,                       // Debug-Modus aktivieren
                     preserveFormHandlers: false,       // Erhält vorhandene Event-Handler
                     resetFormOnSuccess: true,          // Formular nur bei erfolgreichem Absenden leeren
-                    resetFormOnFailure: false          // Formular nicht leeren, wenn Absenden fehlschlägt
+                    resetFormOnFailure: false,         // Formular nicht leeren, wenn Absenden fehlschlägt
+                    useTemplates: true                 // Templates aus dem templates-Ordner verwenden
                 };
                 
                 // MailSender initialisieren
                 const mailSender = new MailSender(mailConfig);
+                
+                // Wenn Templates verwendet werden sollen, die Template-Konfiguration laden
+                if (mailConfig.useTemplates) {
+                    // Template-Konfiguration setzen
+                    mailSender.setTemplates({
+                        templates: {
+                            'kontakt': {
+                                subject: 'Neue Anfrage: {{vorname}} {{name}}',
+                                // Template aus Datei laden
+                                body: loadTemplate('contact.html'),
+                                attachments: true,
+                                confirmation: {
+                                    enabled: true,
+                                    subject: 'Ihre Anfrage bei Capture Barrierefrei',
+                                    body: loadTemplate('confirmation.html')
+                                }
+                            }
+                        },
+                        functions: {
+                            date: () => new Date().toLocaleDateString('de-DE'),
+                            time: () => new Date().toLocaleTimeString('de-DE'),
+                            year: () => new Date().getFullYear().toString(),
+                            referenceNumber: () => 'REF-' + Math.random().toString(36).substr(2, 9).toUpperCase()
+                        },
+                        defaults: {
+                            nachricht: '[Keine Nachricht angegeben]',
+                            telefon: '[Keine Telefonnummer angegeben]'
+                        }
+                    });
+                }
             }, 1000);
         });
+
+        /**
+         * Lädt ein E-Mail-Template aus einer Datei
+         * @param {string} templateName - Der Name der Template-Datei ohne Pfad
+         * @returns {string} - Der Inhalt des Templates
+         */
+        function loadTemplate(templateName) {
+            // In der Browser-Umgebung: Template per AJAX laden
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', `/templates/${templateName}`, false); // Synchroner Request
+            xhr.send();
+            
+            if (xhr.status === 200) {
+                return xhr.responseText;
+            } else {
+                console.error(`Template ${templateName} konnte nicht geladen werden.`);
+                return '';
+            }
+        }
     </script>
     </body>
 </html>
