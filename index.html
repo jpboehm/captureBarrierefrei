@@ -31,7 +31,7 @@
                 <p id="security-message">Aus Sicherheitsgründen führen wir im Hintergrund eine automatische Prüfung durch, um sicherzustellen, dass Sie kein Bot sind. Ihre Privatsphäre bleibt dabei geschützt.</p>
             </div>
 
-            <form id="kontaktFormular" method="post" novalidate aria-describedby="form-feedback" class="protected">
+            <form id="kontaktFormular" method="post" novalidate aria-describedby="form-feedback" class="protected" data-template="kontakt">
                 <div id="form-feedback" class="sr-only" aria-live="assertive"></div>
                 
                 <div class="form-group">
@@ -100,7 +100,7 @@
                 formSelectors: 'form.protected',  // Nur bestimmte Formulare schützen 
                 minTimeToFill: 3000,              // Mindestzeit zum Ausfüllen (ms) 
                 thresholdScore: 10,               // Erforderlicher Mindest-Score (vorher requiredScore)
-                enableLogging: true               // Debug-Modus aktivieren (vorher debug)
+                enableLogging: false               // Debug-Modus aktivieren (vorher debug)
             }; 
             
             // Globale Instanz verwenden statt eine neue zu erstellen
@@ -143,11 +143,15 @@
                                 subject: 'Neue Anfrage: {{vorname}} {{name}}',
                                 // Template aus Datei laden
                                 body: loadTemplate('contact.html'),
+                                // Dynamische Generierung aktivieren
+                                dynamicBody: true,
                                 attachments: true,
                                 confirmation: {
                                     enabled: true,
                                     subject: 'Ihre Anfrage bei Capture Barrierefrei',
-                                    body: loadTemplate('confirmation.html')
+                                    body: loadTemplate('confirmation.html'),
+                                    // Dynamische Generierung für Bestätigungsmail aktivieren
+                                    dynamicBody: true
                                 }
                             }
                         },

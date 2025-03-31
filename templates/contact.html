@@ -90,33 +90,14 @@
             <!-- Falls ein Logo verwendet werden soll -->
             <!-- <img src="{{logoUrl}}" alt="Unternehmenslogo" class="logo"> -->
             <h1>Neue Kontaktanfrage</h1>
+            <p style="color: white; font-size: 14px;">Template wurde erfolgreich verarbeitet!</p>
         </div>
         
         <div class="content">
             <p>Eine neue Anfrage wurde über das Kontaktformular eingereicht:</p>
             
-            <div class="field">
-                <span class="label">Name:</span> {{name}}, {{vorname}}
-            </div>
-            
-            <div class="field">
-                <span class="label">E-Mail:</span> 
-                <a href="mailto:{{email}}">{{email}}</a>
-            </div>
-            
-            <div class="field">
-                <span class="label">Telefon:</span> {{telefon}}
-            </div>
-            
-            <div class="field">
-                <span class="label">Ausgewählte Option:</span> {{optin}}
-            </div>
-            
-            <!-- Nachrichtenbereich mit Einrückung und besonderem Styling -->
-            <div class="message">
-                <span class="label">Nachricht:</span>
-                <p>{{nachricht}}</p>
-            </div>
+            <!-- Dynamisch generierte Felder werden hier eingefügt -->
+            {{dynamicFields}}
             
             <!-- Bereich für Dateianlagen, falls vorhanden -->
             {{#if hasAttachments}}
@@ -129,6 +110,10 @@
                 </ul>
             </div>
             {{/if}}
+            
+            <div class="field">
+                <span class="label">Referenznummer:</span> {{referenceNumber}}
+            </div>
         </div>
         
         <div class="footer">

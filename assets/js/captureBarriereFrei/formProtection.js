@@ -152,25 +152,32 @@ export function updateSubmitButtonState(form, formConfig) {
         }
     });
     
+    // Prüfen, ob die Human-Verification Checkbox angehakt ist
+    const humanVerificationChecked = formConfig.humanVerification && 
+                                     formConfig.humanVerification.checkbox && 
+                                     formConfig.humanVerification.checkbox.checked;
+    
     // Bot-Score prüfen
     const botScore = parseInt(formConfig.botScoreField.value, 10);
     const botScoreThreshold = this.config.thresholdScore || 5;
     const botSuspected = botScore < botScoreThreshold;
     
-    // Button basierend auf Validierungsstatus und Bot-Score aktivieren/deaktivieren
-    if (!allFieldsValid || botSuspected) {
+    // Button basierend auf Validierungsstatus, Bot-Score und Checkbox-Status aktivieren/deaktivieren
+    if (!allFieldsValid || botSuspected || !humanVerificationChecked) {
         submitButton.disabled = true;
         submitButton.classList.add('disabled');
         submitButton.setAttribute('aria-disabled', 'true');
         
         // ARIA-Label für Screenreader aktualisieren
         let reason = '';
-        if (!allFieldsValid && botSuspected) {
-            reason = 'Bitte füllen Sie alle Felder aus und führen Sie menschliche Interaktionen durch';
+        if (!allFieldsValid && botSuspected && !humanVerificationChecked) {
+            reason = 'Bitte füllen Sie alle Felder aus, führen Sie menschliche Interaktionen durch und bestätigen Sie, dass Sie kein Roboter sind';
         } else if (!allFieldsValid) {
             reason = 'Bitte füllen Sie alle erforderlichen Felder aus';
         } else if (botSuspected) {
             reason = 'Bitte führen Sie menschliche Interaktionen durch, um den Bot-Schutz zu deaktivieren';
+        } else if (!humanVerificationChecked) {
+            reason = 'Bitte bestätigen Sie, dass Sie kein Roboter sind';
         }
         submitButton.setAttribute('aria-label', `Absenden (deaktiviert: ${reason})`);
     } else {
@@ -205,11 +212,24 @@ export function protectForm(form) {
         '0'
     );
     
+    // Aktuellen Zeitstempel sowohl als Unix-Timestamp als auch in menschenlesbarem Format speichern
+    const now = new Date();
+    const timestamp = now.getTime();
+    const readableTime = now.toLocaleString('de-DE', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+    
+    // Verstecktes Feld für Startzeit mit beiden Formaten
     formConfig.startTimeField = createOrGetHiddenField.call(
         this, 
         form, 
         this.config.startTimeFieldName, 
-        Date.now().toString()
+        `${timestamp}|${readableTime}`
     );
     
     // Honeypot-Feld hinzufügen, wenn nicht vorhanden
@@ -220,6 +240,10 @@ export function protectForm(form) {
     
     // Submit-Event-Listener hinzufügen
     form.addEventListener('submit', (event) => {
+        // Immer das Standard-Verhalten verhindern, auch wenn die Validierung fehlschlägt
+        event.preventDefault();
+        
+        // Dann mit der normalen Formularverarbeitung fortfahren
         this.processFormSubmission(event, form, formConfig);
     });
     

@@ -90,7 +90,18 @@ export function processFormSubmission(event, form, formConfig) {
     }
     
     // Zeit-Analyse
-    const elapsedTime = Date.now() - parseInt(formConfig.startTimeField.value, 10);
+    const startTimeValue = formConfig.startTimeField.value;
+    let startTime;
+    
+    // Neues Format verarbeiten (timestamp|lesbaresFormat)
+    if (startTimeValue.includes('|')) {
+        startTime = parseInt(startTimeValue.split('|')[0], 10);
+    } else {
+        // Fallback für ältere Einträge, die nur den Timestamp enthalten
+        startTime = parseInt(startTimeValue, 10);
+    }
+    
+    const elapsedTime = Date.now() - startTime;
     this.logDebug('Verstrichene Zeit seit Formularstart:', elapsedTime + 'ms');
     
     // Zeit-Schwellenwert prüfen

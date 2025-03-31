@@ -84,12 +84,36 @@ class MailSender {
         try {
             const form = event.target;
             
+            // Reguläre Formulardaten extrahieren für Template-Verarbeitung
+            const formDataPlain = this.scanFormFields(form);
+            
             // FormData-Objekt für Dateien und reguläre Felder verwenden
             const formDataObj = new FormData(form);
             
             // Empfänger und Betreff manuell hinzufügen
             formDataObj.append('recipient', this.config.recipient);
             formDataObj.append('subject', this.config.subject);
+            
+            // Templates anwenden, falls konfiguriert
+            if (this.config.useTemplates && this.templateConfig) {
+                this.applyTemplates(formDataPlain, form);
+                
+                // Aktualisierte Werte aus der Template-Verarbeitung in FormData einfügen
+                if (formDataPlain.subject) {
+                    formDataObj.set('subject', formDataPlain.subject);
+                }
+                
+                if (formDataPlain.customBody) {
+                    formDataObj.set('customBody', formDataPlain.customBody);
+                }
+                
+                // Bestätigungsmail-Daten hinzufügen, falls vorhanden
+                if (formDataPlain.confirmation) {
+                    formDataObj.set('confirmationRecipient', formDataPlain.confirmation.recipient);
+                    formDataObj.set('confirmationSubject', formDataPlain.confirmation.subject);
+                    formDataObj.set('confirmationBody', formDataPlain.confirmation.body);
+                }
+            }
             
             // Nur für Debugging - reguläre Formulardaten zeigen
             if (this.config.debug) {
@@ -143,8 +167,8 @@ class MailSender {
         for (let i = 0; i < elements.length; i++) {
             const element = elements[i];
             
-            // Ignoriere Submit-Buttons und Elemente ohne Namen
-            if (element.type === 'submit' || !element.name) continue;
+            // Ignoriere Submit-Buttons, leere Namen und Datei-Inputs (werden separat behandelt)
+            if (element.type === 'submit' || !element.name || element.type === 'file') continue;
             
             // Wert je nach Elementtyp extrahieren
             if (element.type === 'checkbox' || element.type === 'radio') {
@@ -164,10 +188,39 @@ class MailSender {
             }
         }
         
+        // Datei-Inputs separat scannen und Informationen extrahieren
+        const fileInputs = form.querySelectorAll('input[type="file"]');
+        if (fileInputs.length > 0) {
+            const attachments = [];
+            let hasAttachments = false;
+            
+            for (const fileInput of fileInputs) {
+                if (fileInput.files.length > 0) {
+                    hasAttachments = true;
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        const file = fileInput.files[i];
+                        attachments.push({
+                            name: file.name,
+                            size: this.formatFileSize(file.size),
+                            type: file.type
+                        });
+                    }
+                }
+            }
+            
+            if (hasAttachments) {
+                formData.hasAttachments = true;
+                formData.attachments = attachments;
+            }
+        }
+        
+        // Basisdaten hinzufügen
+        formData.recipient = this.config.recipient;
+        formData.subject = this.config.subject;
+        
         return formData;
     }
 
-    // Neue Methode zur Validierung von Dateien
     validateFiles(files) {
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
@@ -190,7 +243,6 @@ class MailSender {
         return true;
     }
     
-    // Hilfsmethode zum Formatieren der Dateigröße
     formatFileSize(bytes) {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
@@ -200,22 +252,18 @@ class MailSender {
     }
 
     sendMail(formData, form) {
-        // Wenn Templates konfiguriert sind, wenden wir sie an
         if (this.config.useTemplates && this.templateConfig) {
             this.applyTemplates(formData, form);
         }
 
-        // Wenn es keine Datei-Inputs gibt, verwende die alte Methode
         const fileInputs = form.querySelectorAll('input[type="file"]');
         if (fileInputs.length === 0) {
-            // Status-Indikator setzen
             this.updateFormStatus(form, 'sending', 'Nachricht wird gesendet...');
             
             if (this.config.debug) {
                 console.log('MailSender: Sende Daten an', this.config.endpoint, formData);
             }
             
-            // Senden mit Fetch API
             fetch(this.config.endpoint, {
                 method: this.config.method,
                 headers: {
@@ -236,15 +284,12 @@ class MailSender {
                 return response.json();
             })
             .then(data => {
-                // Debug-Informationen anzeigen
                 if (this.config.debug) {
                     console.log('MailSender: Antwort-Daten', data);
                 }
                 
-                // Erfolgreiche Antwort
                 this.updateFormStatus(form, 'success', 'Ihre Nachricht wurde erfolgreich gesendet!');
                 
-                // Formular nur zurücksetzen, wenn resetFormOnSuccess true ist
                 if (this.config.resetFormOnSuccess) {
                     form.reset();
                     if (this.config.debug) {
@@ -259,11 +304,9 @@ class MailSender {
                 }
             })
             .catch(error => {
-                // Fehlerbehandlung
                 console.error('MailSender: Fehler beim Senden der Anfrage', error);
                 this.updateFormStatus(form, 'error', 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
                 
-                // Formular nur zurücksetzen, wenn resetFormOnFailure true ist
                 if (this.config.resetFormOnFailure) {
                     form.reset();
                     if (this.config.debug) {
@@ -273,13 +316,11 @@ class MailSender {
                     console.log('MailSender: Formular bleibt nach fehlgeschlagenem Senden erhalten (resetFormOnFailure: false)');
                 }
                 
-                // Fallback: Mailto-Link öffnen, wenn Server-Senden fehlschlägt
                 if (this.config.fallbackToMailto) {
                     this.openMailtoFallback(formData);
                 }
             });
         } else {
-            // Bei Datei-Inputs, FormData erstellen und die neue Methode verwenden
             const formDataObj = new FormData(form);
             for (const key in formData) {
                 formDataObj.append(key, formData[key]);
@@ -288,26 +329,21 @@ class MailSender {
         }
     }
 
-    // Neue Methode zum Senden von Formulardaten mit Dateien
     sendMailWithFiles(formData, form) {
-        // Feedback-Element für Screenreader finden
         const feedbackElement = document.getElementById('form-feedback') || 
                                form.querySelector('[aria-live]') || 
                                document.createElement('div');
         
-        // Status-Indikator setzen
         this.updateFormStatus(form, 'sending', 'Nachricht wird gesendet...');
         
         if (this.config.debug) {
             console.log('MailSender: Sende Daten mit Dateien an', this.config.endpoint);
         }
         
-        // Senden mit Fetch API mit FormData (unterstützt Dateien)
         fetch(this.config.endpoint, {
             method: this.config.method,
-            body: formData, // FormData direkt verwenden
+            body: formData,
             credentials: 'same-origin'
-            // Wichtig: Keine Content-Type Header setzen, da FormData automatisch 'multipart/form-data' verwendet
         })
         .then(response => {
             if (this.config.debug) {
@@ -320,15 +356,12 @@ class MailSender {
             return response.json();
         })
         .then(data => {
-            // Debug-Informationen anzeigen
             if (this.config.debug) {
                 console.log('MailSender: Antwort-Daten', data);
             }
             
-            // Erfolgreiche Antwort
             this.updateFormStatus(form, 'success', 'Ihre Nachricht wurde erfolgreich gesendet!');
             
-            // Formular nur zurücksetzen, wenn resetFormOnSuccess true ist
             if (this.config.resetFormOnSuccess) {
                 form.reset();
                 if (this.config.debug) {
@@ -343,11 +376,9 @@ class MailSender {
             }
         })
         .catch(error => {
-            // Fehlerbehandlung
             console.error('MailSender: Fehler beim Senden der Anfrage', error);
             this.updateFormStatus(form, 'error', 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.');
             
-            // Formular nur zurücksetzen, wenn resetFormOnFailure true ist
             if (this.config.resetFormOnFailure) {
                 form.reset();
                 if (this.config.debug) {
@@ -357,7 +388,6 @@ class MailSender {
                 console.log('MailSender: Formular bleibt nach fehlgeschlagenem Senden erhalten (resetFormOnFailure: false)');
             }
             
-            // Fallback: Mailto-Link öffnen, wenn Server-Senden fehlschlägt
             if (this.config.fallbackToMailto) {
                 this.openMailtoFallback(this.scanFormFields(form));
             }
@@ -365,17 +395,14 @@ class MailSender {
     }
 
     updateFormStatus(form, status, message) {
-        // Feedback-Element aktualisieren
         const feedbackElement = document.getElementById('form-feedback');
         if (feedbackElement) {
             feedbackElement.textContent = message;
             feedbackElement.className = `sr-only status-${status}`;
         }
         
-        // Visuelles Feedback (optional)
         form.setAttribute('data-status', status);
         
-        // Aria-live für Screenreader
         const ariaLive = form.querySelector('[aria-live="assertive"]');
         if (ariaLive) {
             ariaLive.textContent = message;
@@ -383,7 +410,6 @@ class MailSender {
     }
 
     openMailtoFallback(formData) {
-        // Erstelle Mailto-Link als Fallback
         let body = '';
         for (const key in formData) {
             if (key !== 'recipient' && key !== 'subject') {
@@ -400,10 +426,6 @@ class MailSender {
         window.location.href = mailtoLink;
     }
 
-    /**
-     * Setzt die Template-Konfiguration für E-Mails
-     * @param {Object} config - Konfigurationsobjekt für Templates
-     */
     setTemplates(config) {
         this.templateConfig = config;
         
@@ -412,11 +434,6 @@ class MailSender {
         }
     }
 
-    /**
-     * Wendet Template auf Formulardaten an
-     * @param {Object} formData - Die gesammelten Formulardaten
-     * @param {HTMLFormElement} form - Das Formular-Element
-     */
     applyTemplates(formData, form) {
         if (!this.templateConfig || !this.templateConfig.templates) {
             if (this.config.debug) {
@@ -426,7 +443,6 @@ class MailSender {
         }
 
         try {
-            // Standard-Template verwenden oder das erste in der Konfiguration
             const templateName = form.dataset.template || Object.keys(this.templateConfig.templates)[0];
             const templateConfig = this.templateConfig.templates[templateName];
 
@@ -437,22 +453,35 @@ class MailSender {
                 return;
             }
 
-            // Betreff aus Template mit Platzhaltern ersetzen
             if (templateConfig.subject) {
                 formData.subject = this.replacePlaceholders(templateConfig.subject, formData);
             }
 
-            // E-Mail-Body aus Template mit Platzhaltern ersetzen
+            // Dynamische Template-Erstellung basierend auf den Formularfeldern
             if (templateConfig.body) {
-                formData.customBody = this.replacePlaceholders(templateConfig.body, formData);
+                // Normales Template-Verhalten beibehalten
+                let bodyTemplate = templateConfig.body;
+                
+                // Prüfen, ob das Template dynamisch erstellt werden soll
+                if (templateConfig.dynamicBody) {
+                    bodyTemplate = this.createDynamicTemplate(bodyTemplate, formData, form);
+                }
+                
+                formData.customBody = this.replacePlaceholders(bodyTemplate, formData);
             }
 
-            // Generiere Bestätigungs-E-Mail falls konfiguriert
+            // Auch für Bestätigungsmails dynamische Templates unterstützen
             if (templateConfig.confirmation && templateConfig.confirmation.enabled) {
+                let confirmationBody = templateConfig.confirmation.body;
+                
+                if (templateConfig.confirmation.dynamicBody) {
+                    confirmationBody = this.createDynamicTemplate(confirmationBody, formData, form);
+                }
+                
                 formData.confirmation = {
                     recipient: formData.email || '',
                     subject: this.replacePlaceholders(templateConfig.confirmation.subject, formData),
-                    body: this.replacePlaceholders(templateConfig.confirmation.body, formData)
+                    body: this.replacePlaceholders(confirmationBody, formData)
                 };
             }
 
@@ -461,7 +490,9 @@ class MailSender {
                     template: templateName,
                     subject: formData.subject,
                     hasCustomBody: !!formData.customBody,
-                    hasConfirmation: !!formData.confirmation
+                    hasConfirmation: !!formData.confirmation,
+                    dynamicTemplateUsed: !!(templateConfig.dynamicBody || 
+                                         (templateConfig.confirmation && templateConfig.confirmation.dynamicBody))
                 });
             }
         } catch (error) {
@@ -470,24 +501,88 @@ class MailSender {
     }
 
     /**
-     * Ersetzt Platzhalter im Template mit tatsächlichen Werten
-     * @param {string} template - Der Template-String
-     * @param {Object} data - Objekt mit Ersetzungswerten
-     * @returns {string} - Template mit ersetzten Platzhaltern
+     * Erstellt ein dynamisches Template basierend auf den Formularfeldern
+     * @param {string} baseTemplate - Die Basis-Template-HTML
+     * @param {Object} formData - Die gesammelten Formulardaten
+     * @param {HTMLFormElement} form - Das Formular-Element
+     * @returns {string} - Das angepasste Template
      */
+    createDynamicTemplate(baseTemplate, formData, form) {
+        // Prüfen, ob das Template den Platzhalter für dynamische Felder enthält
+        if (!baseTemplate.includes('{{dynamicFields}}')) {
+            return baseTemplate; // Wenn nicht, unverändert zurückgeben
+        }
+        
+        let dynamicFieldsHtml = '';
+        const excludedFields = ['recipient', 'subject', 'customBody', 'confirmation', 'hasAttachments', 'attachments'];
+        
+        // Alle Formularfelder durchgehen und HTML-Struktur für jedes Feld erzeugen
+        for (const fieldName in formData) {
+            // Systeminterne Felder und leere Werte überspringen
+            if (excludedFields.includes(fieldName) || 
+                formData[fieldName] === undefined || 
+                formData[fieldName] === '') {
+                continue;
+            }
+            
+            // Prüfen, ob es sich um ein Array oder Objekt handelt
+            if (Array.isArray(formData[fieldName]) || typeof formData[fieldName] === 'object') {
+                continue; // Komplexe Datentypen überspringen - werden durch andere Mechanismen gehandhabt
+            }
+            
+            // Label für das Feld finden oder erstellen
+            let labelText = this.getFieldLabel(fieldName, form);
+            
+            // HTML für das Feld erstellen
+            dynamicFieldsHtml += `
+            <div class="field">
+                <span class="label">${labelText}:</span> ${formData[fieldName]}
+            </div>`;
+        }
+        
+        // Nachrichtenfeld gesondert behandeln, falls vorhanden
+        if (formData.nachricht) {
+            dynamicFieldsHtml += `
+            <div class="message">
+                <span class="label">Nachricht:</span>
+                <p>${formData.nachricht}</p>
+            </div>`;
+        }
+        
+        // Platzhalter im Template ersetzen
+        return baseTemplate.replace('{{dynamicFields}}', dynamicFieldsHtml);
+    }
+    
+    /**
+     * Versucht, das Label für ein Formularfeld zu finden
+     * @param {string} fieldName - Der Name des Formularfelds
+     * @param {HTMLFormElement} form - Das Formular
+     * @returns {string} - Der Labeltext oder ein formatierter Feldname
+     */
+    getFieldLabel(fieldName, form) {
+        // Versuchen, das Label-Element im Formular zu finden
+        const input = form.querySelector(`[name="${fieldName}"]`);
+        if (input && input.id) {
+            const label = form.querySelector(`label[for="${input.id}"]`);
+            if (label) {
+                return label.textContent;
+            }
+        }
+        
+        // Fallback: Feldnamen formatieren (erste Buchstabe groß)
+        return fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
+    }
+
     replacePlaceholders(template, data) {
         let result = template;
 
-        // Einfache Platzhalter ersetzen {{variable}}
         result = result.replace(/\{\{([^#\/][^}]*)\}\}/g, (match, key) => {
             const trimmedKey = key.trim();
             
-            // Prüfen ob es eine Funktion in der Template-Konfiguration gibt
             if (this.templateConfig.functions && this.templateConfig.functions[trimmedKey]) {
                 return this.templateConfig.functions[trimmedKey]();
             }
             
-            // Sonst den Wert aus den Formulardaten oder einen Standardwert verwenden
             const value = data[trimmedKey];
             if (value !== undefined) {
                 return value;
@@ -495,14 +590,11 @@ class MailSender {
                 return this.templateConfig.defaults[trimmedKey];
             }
             
-            // Wenn kein Wert gefunden wurde, Platzhalter entfernen
             return '';
         });
 
-        // Bedingte Blöcke verarbeiten {{#if variable}}...{{/if}}
         result = this.processConditionalBlocks(result, data);
 
-        // Listen verarbeiten {{#each array}}...{{/each}}
         if (data.attachments) {
             result = this.processLoops(result, data);
         }
@@ -510,16 +602,9 @@ class MailSender {
         return result;
     }
 
-    /**
-     * Verarbeitet bedingte Blöcke im Template
-     * @param {string} template - Das Template
-     * @param {Object} data - Die Daten
-     * @returns {string} - Verarbeitetes Template
-     */
     processConditionalBlocks(template, data) {
         return template.replace(/\{\{#if\s+([^}]+)\}\}([\s\S]*?)\{\{\/if\}\}/g, (match, condition, content) => {
             const trimmedCondition = condition.trim();
-            // Prüfen, ob der Wert existiert oder true ist
             if (data[trimmedCondition]) {
                 return content;
             }
@@ -527,12 +612,6 @@ class MailSender {
         });
     }
 
-    /**
-     * Verarbeitet Schleifen im Template
-     * @param {string} template - Das Template
-     * @param {Object} data - Die Daten
-     * @returns {string} - Verarbeitetes Template
-     */
     processLoops(template, data) {
         return template.replace(/\{\{#each\s+([^}]+)\}\}([\s\S]*?)\{\{\/each\}\}/g, (match, arrayName, content) => {
             const trimmedArrayName = arrayName.trim();
@@ -551,7 +630,6 @@ class MailSender {
     }
 }
 
-// Exportiere für Module-Systeme
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = MailSender;
 }

@@ -132,6 +132,7 @@ export function createOrGetHumanVerification(form) {
         checkbox.setAttribute('aria-required', 'true');
         checkbox.setAttribute('aria-describedby', `${checkboxId}-desc`);
         checkbox.setAttribute('aria-invalid', 'false');
+        checkbox.required = true; // Setze required-Attribut
         
         // Sichtbares Label für die Checkbox
         const label = document.createElement('label');
