@@ -31,7 +31,7 @@ const MIN_AUSFUELLZEIT = 3;                     // Minimale Zeit zum Ausfüllen 
 
 // ------ ERWEITERTE EINSTELLUNGEN ------
 // Diese Einstellungen müssen normalerweise nicht geändert werden
-const DEBUGGING = false;                        // Debug-Meldungen in der Konsole anzeigen
+const DEBUGGING = true;                        // Debug-Meldungen in der Konsole anzeigen
 
 /**
  * BITTE UNTENSTEHENDEN CODE NICHT ÄNDERN,
@@ -53,7 +53,7 @@ function erstelleModulKonfigurationen() {
     recipient: EMPFAENGER_EMAIL,
     subject: EMAIL_BETREFF,
     formSelector: FORMULAR_ID,
-    endpoint: 'send_mail.php',
+    endpoint: 'assets/php/send_mail.php',
     method: 'POST',
     fallbackToMailto: false,
     debug: DEBUGGING,
@@ -68,24 +68,6 @@ function erstelleModulKonfigurationen() {
   return { captureConfig, mailConfig };
 }
 
-// Lädt eine E-Mail-Vorlage asynchron
-function ladeVorlage(vorlagenName) {
-  return new Promise((resolve, reject) => {
-    fetch(`/assets/templates/${vorlagenName}`)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`Vorlage ${vorlagenName} konnte nicht geladen werden (Status: ${response.status})`);
-        }
-        return response.text();
-      })
-      .then(text => resolve(text))
-      .catch(error => {
-        console.error(`Fehler beim Laden der Vorlage ${vorlagenName}:`, error);
-        reject(error);
-      });
-  });
-}
-
 // Initialisiert die Module mit den Konfigurationen
 async function initialisiere() {
   const { captureConfig, mailConfig } = erstelleModulKonfigurationen();
@@ -96,13 +78,31 @@ async function initialisiere() {
     console.log('Bot-Schutz aktiviert');
   }
   
-  // MailSender initialisieren (mit Verzögerung, um sicherzustellen, dass der Bot-Schutz zuerst geladen wird)
+  // MailSender initialisieren
   if (window.MailSender) {
     const mailSender = new MailSender(mailConfig);
     
     // Vorlagen konfigurieren, wenn aktiviert
     if (VORLAGEN_VERWENDEN) {
       try {
+        // Hilfsfunktion zum Laden von Vorlagen - nur definiert wenn benötigt
+        const ladeVorlage = (vorlagenName) => {
+          return new Promise((resolve, reject) => {
+            fetch(`/assets/templates/${vorlagenName}`)
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Vorlage ${vorlagenName} konnte nicht geladen werden (Status: ${response.status})`);
+                }
+                return response.text();
+              })
+              .then(text => resolve(text))
+              .catch(error => {
+                console.error(`Fehler beim Laden der Vorlage ${vorlagenName}:`, error);
+                reject(error);
+              });
+          });
+        };
+        
         // Vorlagen asynchron laden
         const [kontaktVorlage, bestaetigungsVorlage] = await Promise.all([
           ladeVorlage(VORLAGE_KONTAKT),

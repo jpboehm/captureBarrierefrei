@@ -1,20 +1,18 @@
 # CaptureBarriereFrei - Barrierefreie Formulare mit effektivem Bot-Schutz
 
-![CaptureBarriereFrei Logo](assets/img/logo.png) *(Optional: Logo hinzufügen)*
-
 ## Übersicht
 
-CaptureBarriereFrei bietet eine innovative, vollständig barrierefreie Alternative zu konventionellen CAPTCHA-Systemen. Die Lösung schützt Webformulare zuverlässig vor automatisierten Bot-Zugriffen und gewährleistet gleichzeitig uneingeschränkte Zugänglichkeit für alle Nutzer. Im Gegensatz zu herkömmlichen CAPTCHAs, die erhebliche Barrieren für Menschen mit Behinderungen darstellen können, setzt CaptureBarriereFrei auf eine Kombination nicht-intrusiver, intelligenter Techniken zur Unterscheidung zwischen menschlichen Nutzern und automatisierten Bots.
+CaptureBarriereFrei bietet eine innovative, vollständig barrierefreie Alternative zu konventionellen CAPTCHA-Systemen. Die Lösung schützt Webformulare zuverlässig vor automatisierten Bot-Zugriffen und gewährleistet gleichzeitig uneingeschränkte Zugänglichkeit für alle Nutzer. Im Gegensatz zu herkömmlichen CAPTCHAs, die erhebliche Hürden für Menschen mit Behinderungen darstellen können, setzt CaptureBarriereFrei auf eine Kombination nicht-intrusiver, intelligenter Techniken zur zuverlässigen Unterscheidung zwischen menschlichen Nutzern und automatisierten Bots.
 
 ### Kernfunktionen
 
 - **Barrierefreier Bot-Schutz**: Robuste Sicherheit ohne Einschränkung der Zugänglichkeit
 - **Verhaltensbasierte Analyse**: Erkennung menschlicher Interaktionsmuster durch differenzierte Auswertung von Maus-, Tastatur- und Scrollverhalten
-- **Honeypot-Mechanismen**: Strategisch platzierte, für Menschen unsichtbare Fallen für Bots
-- **Intelligente Zeitanalyse**: Präzise Auswertung realistischer Formular-Ausfüllzeiten
-- **Barrierefreie Verifizierung**: Semantisch korrekte und mit Screenreadern kompatible Bestätigungselemente
+- **Intelligente Honeypot-Mechanismen**: Strategisch platzierte, für Menschen unsichtbare Fallen für Bots
+- **Präzise Zeitanalyse**: Auswertung realistischer Formular-Ausfüllzeiten
+- **Barrierefreie Verifikation**: Semantisch korrekte und mit Screenreadern kompatible Bestätigungselemente
+- **Zuverlässiger E-Mail-Versand**: Integrierte Kommunikationsfunktionen mit automatischen Fallback-Mechanismen
 - **Modulares, erweiterbares Design**: Flexible Anpassung an unterschiedliche Anforderungen
-- **Zuverlässiger E-Mail-Versand**: Integrierte Kommunikationsfunktionen mit automatischen Fallback-Optionen
 
 ## Installation
 
@@ -36,19 +34,93 @@ CaptureBarriereFrei bietet eine innovative, vollständig barrierefreie Alternati
    http://localhost/mailTest/mail_diagnose.php
    ```
 
-3. E-Mail-Empfängeradresse in der Konfiguration anpassen (index.html):
-   ```javascript
-   recipient: 'ihre.email@domain.de',
-   ```
+3. Konfiguration anpassen (siehe nächster Abschnitt)
 
-## Architektur
+## Konfiguration
 
-CaptureBarriereFrei ist nach dem Prinzip der Modularität konzipiert und besteht aus zwei Hauptkomponenten:
+Die Konfiguration erfolgt über die zentrale Datei `assets/js/config.js`. Hier werden alle Einstellungen für beide Module definiert:
 
-1. **CaptureBarriereFrei-Kernmodul**: Realisiert den barrierefreien Bot-Schutz
-2. **MailSender-Modul**: Steuert die sichere Verarbeitung und Übermittlung von Formulardaten
+```javascript
+// Empfängeradresse für das Kontaktformular
+const EMPFAENGER_EMAIL = 'ihre.email@domain.de';
 
-Beide Module können unabhängig voneinander oder in Kombination eingesetzt werden.
+// Betreff für die E-Mail
+const EMAIL_BETREFF = 'Neue Anfrage über Ihr Kontaktformular';
+
+// Bot-Schutz-Einstellungen
+const MIN_AUSFUELLZEIT = 3000;            // Millisekunden
+const SCHWELLWERT_PUNKTE = 10;            // Erforderliche Punkte für gültige Absendung
+
+// Dateiupload-Einstellungen
+const MAX_DATEIGROESSE = 5;               // MB
+const ERLAUBTE_DATEITYPEN = ['.jpg', '.jpeg', '.png', '.pdf'];
+
+// Debug-Einstellungen
+const DEBUGGING = false;                  // Debug-Meldungen in der Konsole anzeigen
+```
+
+Die detaillierten Konfigurationsoptionen werden automatisch in der `erstelleModulKonfigurationen()`-Funktion verarbeitet und an die entsprechenden Module übergeben.
+
+## Einbindung
+
+### HTML-Grundstruktur
+
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kontaktformular</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <!-- Formular mit der Klasse "protected" für automatischen Bot-Schutz -->
+    <form id="kontaktFormular" method="post" class="protected">
+        <!-- Formularfelder -->
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">E-Mail</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        
+        <!-- Dateiupload-Unterstützung -->
+        <div class="form-group">
+            <label for="upload">Datei-Upload</label>
+            <input type="file" id="upload" name="upload" accept=".jpg, .jpeg, .png, .pdf">
+            <p class="file-size-info">Maximale Dateigröße: 5 MB</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="message">Nachricht</label>
+            <textarea id="message" name="message" required></textarea>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit">Nachricht senden</button>
+        </div>
+    </form>
+
+    <!-- Feedback-Bereich für Statusmeldungen -->
+    <div id="form-feedback" aria-live="polite"></div>
+
+    <!-- Script-Einbindung -->
+    <script src="assets/js/config.js"></script>
+    <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
+    <script src="assets/js/mailSender.js"></script>
+    <script>
+        // Initialisierung starten, wenn das DOM geladen ist
+        document.addEventListener('DOMContentLoaded', function() {
+            // Konfiguration einlesen und beide Module initialisieren
+            FormularKonfiguration.initialisiere();
+        });
+    </script>
+</body>
+</html>
+```
 
 ## Modul 1: CaptureBarriereFrei - Intelligente Bot-Erkennung
 
@@ -87,7 +159,7 @@ Strategisch implementierte Fallen für automatisierte Systeme:
 
 - **Für Menschen unsichtbar**: Vollständige Verbergung durch CSS (position: absolute; left: -9999px)
 - **Screenreader-kompatibel**: Korrekte Implementierung von aria-hidden="true"
-- **Tab-Navigation-sicher**: Ausschluss aus dem Tabreihenfolge (tabindex="-1")
+- **Tab-Navigation-sicher**: Ausschluss aus der Tabreihenfolge (tabindex="-1")
 
 #### Barrierefreie Verifikation
 
@@ -99,16 +171,11 @@ Eine innovative, zugängliche Alternative zu traditionellen CAPTCHA-Elementen:
 
 #### Score-basierte Entscheidungslogik
 
-Der Erkennungsmechanismus verwendet ein präzises Punktesystem:
+Ein nuanciertes Punktesystem bewertet Interaktionen und ermöglicht eine präzise Klassifizierung:
 
-| Interaktionskriterium | Bedingung | Punkte |
-|----------------------|-----------|--------|
-| Mausinteraktionen | > 4 Events | +8 |
-| Tastatureingaben | > 3 Events | +12 |
-| Scrollaktionen | ≥ 1 Event | +7 |
-| Verifikations-Checkbox | Aktiviert | +25 |
-| Ausgewogenes Interaktionsverhältnis | Ratio 0,3-3,0 | +5 |
-| Honeypot-Feld | Ausgefüllt | -150 |
+- **Kumulative Bewertung**: Zusammenführung verschiedener Interaktionsmetriken
+- **Gewichtete Faktoren**: Priorisierung besonders aussagekräftiger Verhaltensmuster
+- **Dynamische Schwellenwerte**: Anpassbare Grenzen für unterschiedliche Sicherheitsanforderungen
 
 ##### Beispielanalyse eines menschlichen Nutzers:
 - Diverse Mausinteraktionen: +8 Punkte
@@ -157,7 +224,7 @@ const captureConfig = {
 
 ### Übersicht
 
-Das MailSender-Modul stellt ein professionelles System zur sicheren Verarbeitung und Übermittlung von Formulardaten per E-Mail bereit. Es ist vollständig mit dem CaptureBarriereFrei-Modul integrierbar, funktioniert aber auch eigenständig.
+Das MailSender-Modul stellt ein professionelles System zur sicheren Verarbeitung und Übermittlung von Formulardaten per E-Mail bereit. Es ist vollständig mit dem CaptureBarriereFrei-Modul integrierbar und wird über die zentrale Konfigurationsdatei gesteuert.
 
 ### Architektur
 
@@ -215,7 +282,9 @@ Umfassende Sicherheitsmaßnahmen schützen vor Missbrauch:
 3. **Anti-Spam-Integration**: Nahtlose Verknüpfung mit CaptureBarriereFrei
 4. **Transportverschlüsselung**: Optionale HTTPS-Erzwingung
 
-### Detaillierte Konfigurationsoptionen
+### Verfügbare Konfigurationsoptionen
+
+In der `config.js` werden die wichtigsten Einstellungen definiert. Intern werden folgende Parameter unterstützt:
 
 ```javascript
 const mailConfig = {
@@ -243,9 +312,12 @@ const mailConfig = {
     debug: false,                          // Aktivierung detaillierter Protokollierung
     preserveFormHandlers: true,            // Erhaltung vorhandener Event-Handler
     scrollToFeedback: true,                // Automatisches Scrollen zum Feedback-Element
+    feedbackElement: '#form-feedback',     // Selektor für das Feedback-Element
     feedbackDuration: 5000                 // Anzeigedauer von Statusmeldungen (0 = permanent)
 };
 ```
+
+Diese Konfiguration wird automatisch aus den Grundeinstellungen in `config.js` erzeugt. Bei speziellen Anforderungen kann die Konfiguration erweitert werden.
 
 ### Erweiterungsmöglichkeiten
 
@@ -325,32 +397,28 @@ function loadEmailTemplate($templateName, $variables) {
     </div>
 </form>
 
-<!-- Status-Anzeige mit ARIA-Unterstützung -->
-<div id="formFeedback" aria-live="polite"></div>
+    <!--    Skripte für die Funktionalität 
+            Folgende Skripte sind erforderlich:
+            - captureBarriereFrei.js: Hauptskript für die Formularverarbeitung
+            - mailSender.js: Skript für den E-Mail-Versand
+            - config.js: Konfiguration und Initialisierung
 
-<!-- Moduleinbindung -->
-<script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
-<script src="assets/js/mailSender.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialisierung des Schutzmoduls
-        window.captureBarriereFreiInstance = new CaptureBarriereFrei({
-            formSelectors: 'form.protected',
-            minTimeToFill: 3000,
-            thresholdScore: 5,
-            enableLogging: true
-        });
-        
-        // Initialisierung des Kommunikationsmoduls
-        const mailSender = new MailSender({
-            recipient: 'empfaenger@beispiel.de',
-            formSelector: '#kontaktFormular',
-            debug: true,
-            fallbackToMailto: true,
-            feedbackElement: '#formFeedback'
-        });
-    });
-</script>
+            Die Skripte sind in der Reihenfolge geladen, in der sie benötigt werden. wichtig sie müssen als module geladen werden,
+            da sie ES6-Module sind.
+    -->
+    <!-- Module-Scripts -->
+    <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
+    <script type="module" src="assets/js/mailSender/index.js"></script>
+    
+    <!-- Konfiguration und Initialisierung -->
+    <script src="assets/js/config.js"></script>
+    <script>
+        // Einfache Initialisierung, wenn die Seite geladen ist
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formular mit den vordefinierten Einstellungen initialisieren
+            window.FormularKonfiguration.initialisiere();
+        });c
+    </script>
 ```
 
 ## Prozessablauf der integrierten Lösung
@@ -380,6 +448,10 @@ function loadEmailTemplate($templateName, $variables) {
 
 ## Anpassung und Erweiterung
 
+### Zentrale Konfigurationsanpassung
+
+Die sauberste Methode zur Anpassung ist die Bearbeitung der `config.js`. Für fortgeschrittene Anpassungen können Sie die folgenden Ansätze verwenden:
+
 ### Visuelle Anpassungen
 
 Die Darstellung lässt sich über CSS individualisieren:
@@ -388,31 +460,40 @@ Die Darstellung lässt sich über CSS individualisieren:
 
 ### Funktionale Erweiterungen
 
-Die Validierungslogik kann durch eigene Regeln erweitert werden:
+Die Erweiterung der Funktionalität sollte vorzugsweise über eigene JavaScript-Dateien erfolgen, die nach der Grundinitialisierung geladen werden:
 
 ```javascript
-// Erweiterung der Feldvalidierung
-const originalValidateField = captureBarriereFreiInstance.validateField;
-captureBarriereFreiInstance.validateField = function(input, errorElement) {
-    // Ausführung der Basisvalidierung
-    const isValid = originalValidateField.call(this, input, errorElement);
-    
-    // Ergänzende Spezialvalidierung
-    if (isValid && input.name === 'iban') {
-        return this.validateIBAN(input.value, errorElement);
-    }
-    
-    return isValid;
-};
-
-// Implementierung spezialisierter Validierungsmethoden
-captureBarriereFreiInstance.validateIBAN = function(value, errorElement) {
-    const isValid = /^[A-Z]{2}\d{2}[A-Z0-9]{12,30}$/.test(value);
-    if (!isValid) {
-        this.showError(errorElement, 'Bitte geben Sie eine gültige IBAN ein.');
-    }
-    return isValid;
-};
+// In einer eigenen Datei, z.B. custom-extensions.js
+document.addEventListener('DOMContentLoaded', function() {
+    // Warten auf Abschluss der Grundinitialisierung
+    setTimeout(function() {
+        // Nach der Initialisierung durch FormularKonfiguration
+        // haben wir Zugriff auf die globalen Instanzen
+        
+        // Erweiterung der Validierung
+        const originalValidateField = window.captureBarriereFreiInstance.validateField;
+        window.captureBarriereFreiInstance.validateField = function(input, errorElement) {
+            // Basisvalidierung
+            const isValid = originalValidateField.call(this, input, errorElement);
+            
+            // Eigene Validierung
+            if (isValid && input.name === 'iban') {
+                return this.validateIBAN(input.value, errorElement);
+            }
+            
+            return isValid;
+        };
+        
+        // Implementierung eigener Validierungsmethoden
+        window.captureBarriereFreiInstance.validateIBAN = function(value, errorElement) {
+            const isValid = /^[A-Z]{2}\d{2}[A-Z0-9]{12,30}$/.test(value);
+            if (!isValid) {
+                this.showError(errorElement, 'Bitte geben Sie eine gültige IBAN ein.');
+            }
+            return isValid;
+        };
+    }, 500); // Kurze Verzögerung, um sicherzustellen, dass die Initialisierung abgeschlossen ist
+});
 ```
 
 ## Problemlösungen
@@ -440,11 +521,11 @@ Bei Zugänglichkeitsproblemen:
 
 ## Lizenz
 
-Dieses Projekt steht unter der MIT-Lizenz - Details finden Sie in der LICENSE.md-Datei.
+Dieses Projekt steht unter der MIT-Lizenz - Details finden Sie in der LICENSE-Datei.
 
 ## Mitwirkende
 
-- [Ihr Name] - Hauptentwickler und Projektmaintainer
+- JP.Böhm - Hauptentwickler und Projektmaintainer
 
 ## Danksagungen
 
