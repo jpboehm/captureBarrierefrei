@@ -73,6 +73,34 @@
             color: #666666;
         }
         
+        /* Styles für die dynamischen Felder */
+        .dynamic-fields {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .dynamic-fields th {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #eeeeee;
+            color: #555555;
+            width: 30%;
+            font-weight: bold;
+            vertical-align: top;
+        }
+        
+        .dynamic-fields td {
+            padding: 8px;
+            border-bottom: 1px solid #eeeeee;
+            vertical-align: top;
+        }
+        
+        .dynamic-fields tr:last-child th, 
+        .dynamic-fields tr:last-child td {
+            border-bottom: none;
+        }
+        
         /* Responsive Anpassungen */
         @media screen and (max-width: 600px) {
             .container {
@@ -94,10 +122,12 @@
         </div>
         
         <div class="content">
-            <p>Eine neue Anfrage wurde über das Kontaktformular eingereicht:</p>
+            <p>Eine neue Anfrage wurde über das Kontaktformular eingereicht</p>
             
-            <!-- Dynamisch generierte Felder werden hier eingefügt -->
-            {{dynamicFields}}
+            <!-- Dynamisch generierte Felder werden hier mit formatierter Tabelle eingefügt -->
+            <table class="dynamic-fields">
+                {{dynamicFields}}
+            </table>
             
             <!-- Bereich für Dateianlagen, falls vorhanden -->
             {{#if hasAttachments}}

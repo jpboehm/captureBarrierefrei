@@ -31,7 +31,7 @@ const MIN_AUSFUELLZEIT = 3;                     // Minimale Zeit zum Ausfüllen 
 
 // ------ ERWEITERTE EINSTELLUNGEN ------
 // Diese Einstellungen müssen normalerweise nicht geändert werden
-const DEBUGGING = true;                        // Debug-Meldungen in der Konsole anzeigen
+const DEBUGGING = false;                        // Debug-Meldungen in der Konsole anzeigen
 
 /**
  * BITTE UNTENSTEHENDEN CODE NICHT ÄNDERN,
@@ -88,7 +88,7 @@ async function initialisiere() {
         // Hilfsfunktion zum Laden von Vorlagen - nur definiert wenn benötigt
         const ladeVorlage = (vorlagenName) => {
           return new Promise((resolve, reject) => {
-            fetch(`/assets/templates/${vorlagenName}`)
+            fetch(`./assets/templates/${vorlagenName}`)
               .then(response => {
                 if (!response.ok) {
                   throw new Error(`Vorlage ${vorlagenName} konnte nicht geladen werden (Status: ${response.status})`);

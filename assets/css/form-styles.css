@@ -1,0 +1,442 @@
+/**
+ * Barrierefreie Formular-Styling-Komponenten
+ * 
+ * Diese Datei enthält alle grundlegenden Styling-Definitionen für
+ * barrierefreie Formulare mit responsivem Design und Fokus auf
+ * Zugänglichkeit nach WCAG 2.1-Richtlinien.
+ * 
+ * - Deutliche Fokus-Zustände für Tastaturbedienung
+ * - Ausreichende Farbkontraste
+ * - Größere Klickbereiche für Touch-Geräte
+ * - Fehlermarkierungen und Hinweise
+ */
+
+/* ---- Grundlegende Formular-Einstellungen mit Flexbox ---- */
+form {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-height: 300px; /* Minimale Höhe für bessere Verteilung */
+}
+
+/* Formulargruppen - Container für Label + Input mit Flexbox */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+/* Beschriftungen - klar und deutlich */
+label {
+    font-weight: 600;
+    color: #333;
+    font-size: 1rem;
+    transition: color 0.2s;
+}
+
+/* Für erforderliche Felder */
+[aria-required="true"] + label::after,
+label[for$="[required]"]::after,
+label[for]:has(+ [required])::after {
+    content: " *";
+    color: #d32f2f;
+}
+
+/* ---- Eingabefelder ---- */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+input[type="password"],
+input[type="date"],
+input[type="time"],
+input[type="search"],
+input[type="url"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+/* Textarea spezifische Einstellungen */
+textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Select-Element Styling */
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.8rem center;
+    background-size: 1em;
+    padding-right: 2.5rem;
+}
+
+/* ---- Fokus- und Hover-Zustände ---- */
+input:hover:not([disabled]),
+select:hover:not([disabled]),
+textarea:hover:not([disabled]) {
+    border-color: #4a86e8;
+    background-color: #fff;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    outline: none;
+    border-color: #4a86e8;
+    box-shadow: 0 0 0 3px rgba(74, 134, 232, 0.2);
+    background-color: #fff;
+}
+
+/* ---- Checkboxen und Radio-Buttons ---- */
+.checkbox-group,
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.checkbox-label,
+.radio-label {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.checkbox-label:hover,
+.radio-label:hover {
+    background-color: rgba(74, 134, 232, 0.05);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+    margin-right: 0.75rem;
+    margin-top: 0.3rem; /* Ausrichtung mit Text-Baseline */
+}
+
+/* Große, klickbare Bereiche für Touch */
+.checkbox-label span,
+.radio-label span {
+    flex: 1;
+}
+
+/* ---- Buttons ---- */
+button,
+.btn,
+input[type="submit"],
+input[type="button"],
+input[type="reset"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.9rem 1.75rem;
+    background-color: #4a86e8;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover,
+.btn:hover,
+input[type="submit"]:hover,
+input[type="button"]:hover,
+input[type="reset"]:hover {
+    background-color: #3a76d8;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+button:focus,
+.btn:focus,
+input[type="submit"]:focus,
+input[type="button"]:focus,
+input[type="reset"]:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 134, 232, 0.4);
+}
+
+button:active,
+.btn:active,
+input[type="submit"]:active,
+input[type="button"]:active,
+input[type="reset"]:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Sekundäre Buttons */
+.btn-secondary {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0;
+}
+
+/* ---- Fehlermeldungen ---- */
+.error-message {
+    display: none;
+    color: #d32f2f;
+    font-size: 0.875rem;
+    margin-top: 0.4rem;
+    padding-left: 0.2rem;
+}
+
+input:invalid + .error-message,
+select:invalid + .error-message,
+textarea:invalid + .error-message,
+input[aria-invalid="true"] + .error-message,
+select[aria-invalid="true"] + .error-message,
+textarea[aria-invalid="true"] + .error-message {
+    display: block;
+}
+
+/* Visuelles Feedback für ungültige Felder */
+input:invalid:not(:placeholder-shown),
+select:invalid:not(:placeholder-shown),
+textarea:invalid:not(:placeholder-shown),
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+    border-color: #d32f2f;
+    background-color: rgba(211, 47, 47, 0.05);
+}
+
+/* ---- Barrierefreiheits-Erweiterungen ---- */
+/* Skip-Link für Tastaturnutzer */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: #4a86e8;
+    color: white;
+    padding: 0.5rem 1rem;
+    z-index: 100;
+    transition: top 0.2s;
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: none;
+}
+
+/* Versteckte Elemente für Screenreader */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ARIA Live-Regionen */
+[aria-live="polite"],
+[aria-live="assertive"] {
+    margin-bottom: 1rem;
+}
+
+/* Erfolgsmeldungen */
+.success-message {
+    background-color: #e8f5e9;
+    border-left: 4px solid #4caf50;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #2e7d32;
+    border-radius: 6px;
+}
+
+/* Ladeanzeige */
+.loading-indicator {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid rgba(74, 134, 232, 0.3);
+    border-radius: 50%;
+    border-top-color: #4a86e8;
+    animation: spin 1s linear infinite;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---- Datei-Upload Styling ---- */
+input[type="file"] {
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 1.5rem;
+    background-color: #f0f0f0;
+    color: #333;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-upload-label:hover {
+    background-color: #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.file-upload-label:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 134, 232, 0.4);
+}
+
+.file-upload-label::before {
+    content: "Datei auswählen";
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.file-name-display {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #666;
+    padding: 0.5rem;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-size-info {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* ---- Form Layout mit Flexbox ---- */
+/* Hauptstruktur des Formulars - Eingabefelder nehmen den verfügbaren Platz ein */
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Verteilt Inhalt und platziert Submit-Button unten */
+}
+
+/* Form-Felder-Container - Alle Eingabefelder bis auf Submit-Button */
+.form-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+/* Form Actions - Container für Submit-Button, immer am Ende */
+.form-actions {
+    margin-top: auto; /* Schiebt den Button ans untere Ende */
+    padding-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    align-self: flex-end;
+}
+
+/* ---- Responsive Anpassungen ---- */
+@media screen and (max-width: 768px) {
+    form {
+        padding: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.2rem;
+    }
+    
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="password"],
+    textarea,
+    select {
+        padding: 0.7rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    button,
+    .btn,
+    input[type="submit"],
+    input[type="button"],
+    input[type="reset"] {
+        width: 100%;
+    }
+}
+
+/* ---- Utilities ---- */
+.form-hint {
+    font-size: 0.875rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.field-with-icon {
+    position: relative;
+}
+
+.field-icon {
+    position: absolute;
+    top: 50%;
+    right: 0.8rem;
+    transform: translateY(-50%);
+    color: #666;
+    pointer-events: none;
+}
+
+.security-notice {
+    background-color: #f8f9fa;
+    border-left: 4px solid #4a86e8;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+    color: #333;
+    border-radius: 6px;
+}
