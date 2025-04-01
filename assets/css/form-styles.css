@@ -9,6 +9,7 @@
  * - Ausreichende Farbkontraste
  * - Größere Klickbereiche für Touch-Geräte
  * - Fehlermarkierungen und Hinweise
+ * - Symmetrische Abstände für ein ausgewogenes Layout
  */
 
 /* ---- Grundlegende Formular-Einstellungen mit Flexbox ---- */
@@ -23,6 +24,7 @@ form {
     flex-direction: column;
     gap: 1.5rem;
     min-height: 300px; /* Minimale Höhe für bessere Verteilung */
+    box-sizing: border-box; /* Verhindert, dass Padding die Gesamtbreite beeinflusst */
 }
 
 /* Formulargruppen - Container für Label + Input mit Flexbox */
@@ -31,6 +33,9 @@ form {
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
+    padding: 0;
+    margin: 0 0 1rem 0; /* Vereinheitlichter Abstand unten */
+    box-sizing: border-box;
 }
 
 /* Beschriftungen - klar und deutlich */
@@ -62,13 +67,14 @@ input[type="url"],
 textarea,
 select {
     width: 100%;
-    padding: 0.9rem 1rem;
+    padding: 0.9rem 1rem; /* Gleichmäßiges Padding links und rechts */
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 1rem;
     line-height: 1.5;
     transition: all 0.3s ease;
     background-color: #f9f9f9;
+    box-sizing: border-box; /* Wichtig für konsistente Breiten */
 }
 
 /* Textarea spezifische Einstellungen */
@@ -83,9 +89,10 @@ select {
     appearance: none;
     background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.8rem center;
+    background-position: right 1rem center; /* Konsistenter Abstand rechts */
     background-size: 1em;
-    padding-right: 2.5rem;
+    padding-right: 2.5rem; /* Mehr Platz für das Icon */
+    text-align: left; /* Text linksbündig für bessere Lesbarkeit */
 }
 
 /* ---- Fokus- und Hover-Zustände ---- */
@@ -111,7 +118,9 @@ textarea:focus {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin: 0 0 1rem 0; /* Symmetrische Margins */
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .checkbox-label,
@@ -122,6 +131,7 @@ textarea:focus {
     padding: 0.5rem;
     border-radius: 4px;
     transition: background-color 0.2s;
+    margin: 0; /* Entfernt unerwünschte Margins */
 }
 
 .checkbox-label:hover,
@@ -150,7 +160,7 @@ input[type="reset"] {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.9rem 1.75rem;
+    padding: 0.9rem 1.75rem; /* Symmetrisches Padding */
     background-color: #4a86e8;
     color: white;
     border: none;
@@ -161,6 +171,7 @@ input[type="reset"] {
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 0; /* Entfernt unerwünschte Margins */
 }
 
 button:hover,
@@ -295,60 +306,103 @@ textarea[aria-invalid="true"] {
 }
 
 /* ---- Datei-Upload Styling ---- */
+.file-upload-container {
+    border: 2px dashed #4a86e8;
+    border-radius: 6px;
+    padding: 1.5rem;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    margin: 0 0 1rem 0; /* Symmetrischer Abstand unten */
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.file-upload-container:hover {
+    background-color: #e8f0fe;
+    border-color: #3a76d8;
+}
+
+.file-upload-container:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(74, 134, 232, 0.4);
+    background-color: #e8f0fe;
+}
+
 input[type="file"] {
-    width: 0.1px;
-    height: 0.1px;
-    opacity: 0;
-    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: auto;
+    opacity: 1;
+    overflow: visible;
+    cursor: pointer;
+    z-index: 2;
+}
+
+/* Verstecke den Standard-Button, aber behalte die Funktionalität */
+input[type="file"]::file-selector-button {
+    font-size: 0;
+    padding: 0;
+    margin-right: 1rem;
+    border: none;
+    visibility: hidden;
     position: absolute;
-    z-index: -1;
 }
 
 .file-upload-label {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.8rem 1.5rem;
-    background-color: #f0f0f0;
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
     color: #333;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s ease;
 }
 
-.file-upload-label:hover {
-    background-color: #e0e0e0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.file-upload-icon {
+    display: block;
+    margin: 0 auto 1rem;
+    width: 48px;
+    height: 48px;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48' viewBox='0 0 24 24' fill='none' stroke='%234a86e8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/%3E%3Cpolyline points='17 8 12 3 7 8'/%3E%3Cline x1='12' y1='3' x2='12' y2='15'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.file-upload-label:focus-within {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(74, 134, 232, 0.4);
-}
-
-.file-upload-label::before {
-    content: "Datei auswählen";
-    display: inline-block;
-    margin-right: 0.5rem;
+.file-upload-hint {
+    display: block;
+    margin-top: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
 }
 
 .file-name-display {
     display: block;
-    margin-top: 0.5rem;
-    font-size: 0.875rem;
-    color: #666;
-    padding: 0.5rem;
-    background-color: #f9f9f9;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #fff;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    color: #333;
+    word-break: break-word;
 }
 
 .file-size-info {
-    font-size: 0.75rem;
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
     color: #666;
-    margin-top: 0.25rem;
+}
+
+.selected-file {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: #e8f0fe;
+    border-radius: 4px;
+    display: none; /* Wird per JavaScript angezeigt, wenn eine Datei ausgewählt ist */
+}
+
+.selected-file.active {
+    display: block;
 }
 
 /* ---- Form Layout mit Flexbox ---- */
@@ -357,6 +411,7 @@ form {
     display: flex;
     flex-direction: column;
     justify-content: space-between; /* Verteilt Inhalt und platziert Submit-Button unten */
+    align-items: center; /* Zentriert die Inhalte horizontal */
 }
 
 /* Form-Felder-Container - Alle Eingabefelder bis auf Submit-Button */
@@ -365,6 +420,24 @@ form {
     flex-direction: column;
     gap: 1.5rem;
     flex: 1;
+    width: 100%; /* Volle Breite des Formulars */
+    align-items: center; /* Zentriert die Elemente horizontal */
+    box-sizing: border-box;
+}
+
+/* Container für Zeilen mit mehreren Elementen */
+.form-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-row .form-group {
+    flex: 1; /* Gleiche Größe für alle Elemente in einer Zeile */
+    min-width: 0; /* Verhindert Überlauf */
 }
 
 /* Form Actions - Container für Submit-Button, immer am Ende */
@@ -372,34 +445,27 @@ form {
     margin-top: auto; /* Schiebt den Button ans untere Ende */
     padding-top: 2rem;
     display: flex;
-    justify-content: flex-end;
+    justify-content: center; /* Zentrierte Buttons */
     gap: 1rem;
-    align-self: flex-end;
+    width: 100%; /* Volle Breite des Formulars */
+    box-sizing: border-box;
 }
 
 /* ---- Responsive Anpassungen ---- */
 @media screen and (max-width: 768px) {
     form {
-        padding: 1.5rem;
+        padding: 1.5rem; /* Weniger Padding auf kleineren Bildschirmen */
     }
     
-    .form-group {
-        margin-bottom: 1.2rem;
-    }
-    
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    input[type="number"],
-    input[type="password"],
-    textarea,
-    select {
-        padding: 0.7rem;
+    .form-row {
+        flex-direction: column; /* Bei kleinen Bildschirmen untereinander */
+        gap: 1rem;
     }
     
     .form-actions {
         flex-direction: column;
         width: 100%;
+        align-items: center;
     }
     
     button,
@@ -408,6 +474,7 @@ form {
     input[type="button"],
     input[type="reset"] {
         width: 100%;
+        max-width: 400px; /* Verhindert zu breite Buttons */
     }
 }
 
@@ -420,12 +487,14 @@ form {
 
 .field-with-icon {
     position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .field-icon {
     position: absolute;
     top: 50%;
-    right: 0.8rem;
+    right: 1rem; /* Konsistenter Abstand rechts */
     transform: translateY(-50%);
     color: #666;
     pointer-events: none;
@@ -435,8 +504,10 @@ form {
     background-color: #f8f9fa;
     border-left: 4px solid #4a86e8;
     padding: 1rem;
-    margin-bottom: 1.5rem;
+    margin: 0 0 1.5rem 0; /* Symmetrische Margins */
     font-size: 0.9rem;
     color: #333;
     border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
 }

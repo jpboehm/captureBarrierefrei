@@ -1,6 +1,6 @@
 :root{
   font-family: Verdana, Geneva, Tahoma, sans-serif;
-  font-size: clamp(16px, 1rem, 24px); /* Clamp gibt ein Minimum 16px, 1rem, 32px */
+  font-size: clamp(14px, 1rem, 24px); /* Clamp gibt ein Minimum 14px, 1rem, 32px */
   line-height: 1.5;
 }
 
@@ -10,7 +10,7 @@ h1{
 }
 
 p{
-  font-size: 1.5rem;
+  font-size: 1rem;
   margin-bottom: 1rem;
 }
 

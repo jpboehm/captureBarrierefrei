@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,7 +12,7 @@
 <body>
     <!-- Skip-Link für Tastaturnutzer (WCAG 2.4.1) -->
     <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
-    
+
     <header role="banner">
         <!-- Standard Header-Bereich mit Navigation */ -->
         <h1>Kontakt</h1>
@@ -27,62 +28,63 @@
         <section aria-labelledby="form-heading">
             <h2 id="form-heading">Kontaktformular</h2>
             <p>Bitte füllen Sie das Formular aus, um uns zu kontaktieren.</p>
-            
+
             <div class="security-notice" aria-live="polite">
-                <p id="security-message">Aus Sicherheitsgründen führen wir im Hintergrund eine automatische Prüfung durch, um sicherzustellen, dass Sie kein Bot sind. Ihre Privatsphäre bleibt dabei geschützt.</p>
+                <p id="security-message">Aus Sicherheitsgründen führen wir im Hintergrund eine automatische Prüfung
+                    durch, um sicherzustellen, dass Sie kein Bot sind. Ihre Privatsphäre bleibt dabei geschützt.</p>
             </div>
 
-            <form id="kontaktFormular" method="post" novalidate aria-describedby="form-feedback" class="protected" data-template="kontakt">
+            <form id="kontaktFormular" method="post" novalidate aria-describedby="form-feedback" class="protected"
+                data-template="kontakt">
                 <div id="form-feedback" class="sr-only" aria-live="assertive"></div>
-                
-                <div class="form-group">
-                   <label for="berufswahl" style="display: none;" >Dropdown</label>
-                     <select id="berufswahl" name="berufswahl" aria-required="true" aria-invalid="false" 
-                            aria-describedby="berufswahl-error">
-                          <option value="" disabled selected>Bitte wählen Sie einen Beruf</option>
-                          <option value="webentwickler">Webentwickler</option>
-                          <option value="grafikdesigner">Grafikdesigner</option>
-                          <option value="ux-designer">UX-Designer</option>
-                     </select>
-                        <div id="berufswahl-error" class="error-message" aria-live="polite"></div>
-                </div>
 
-                <div class="form-group">
-                    <label for="name">Name</label>
-                    <input type="text" id="name" name="name" placeholder="name" required aria-required="true" 
-                           aria-invalid="false" aria-describedby="name-error">
-                    <div id="name-error" class="error-message" aria-live="polite"></div>
-                </div>
 
                 <div class="form-group">
                     <label for="vorname">Vorname</label>
-                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required aria-required="true" 
-                           aria-invalid="false" aria-describedby="vorname-error">
+                    <input type="text" id="vorname" name="vorname" placeholder="Vorname" required aria-required="true"
+                        aria-invalid="false" aria-describedby="vorname-error">
                     <div id="vorname-error" class="error-message" aria-live="polite"></div>
                 </div>
-
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="Nachname" required aria-required="true"
+                        aria-invalid="false" aria-describedby="name-error">
+                    <div id="name-error" class="error-message" aria-live="polite"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email">E-Mail</label>
+                    <input type="email" id="email" name="email" placeholder="Ihre E-Mail-Adresse" required
+                        aria-required="true" aria-invalid="false" aria-describedby="email-error">
+                    <div id="email-error" class="error-message" aria-live="polite"></div>
+                </div>
+                <div class="form-group">
+                    <label for="berufswahl" style="display: none;">Dropdown</label>
+                    <select id="berufswahl" name="berufswahl" aria-required="true" aria-invalid="false"
+                        aria-describedby="berufswahl-error">
+                        <option value="" disabled selected>Bitte wählen Sie einen Beruf</option>
+                        <option value="webentwickler">Webentwickler</option>
+                        <option value="grafikdesigner">Grafikdesigner</option>
+                        <option value="ux-designer">UX-Designer</option>
+                    </select>
+                    <div id="berufswahl-error" class="error-message" aria-live="polite"></div>
+                </div>
                 <div class="form-group">
                     <label for="upload">Datei-Upload</label>
-                    <input type="file" id="upload" name="upload" accept=".jpg, .jpeg, .png, .pdf" aria-required="true" 
-                           aria-invalid="false" aria-describedby="upload-error">
+                    <input type="file" id="upload" name="upload" accept=".jpg, .jpeg, .png, .pdf" aria-required="true"
+                        aria-invalid="false" aria-describedby="upload-error">
                     <div id="upload-error" class="error-message" aria-live="polite"></div>
                     <p class="file-size-info">Maximale Dateigröße: 5 MB</p>
                     <p class="file-type-info">Erlaubte Dateitypen: JPG, JPEG, PNG, PDF</p>
-              </div>
-                
-                <div class="form-group">
-                    <label for="email">E-Mail</label>
-                    <input type="email" id="email" name="email" placeholder="Ihre E-Mail-Adresse" required aria-required="true" 
-                           aria-invalid="false" aria-describedby="email-error">
-                    <div id="email-error" class="error-message" aria-live="polite"></div>
                 </div>
-                
+
+
+
                 <div class="form-group">
                     <label for="nachricht">Nachricht</label>
                     <textarea id="nachricht" name="nachricht" placeholder="Ihre Nachricht" required aria-required="true"
-                              aria-invalid="false" aria-describedby="nachricht-error"></textarea>
+                        aria-invalid="false" aria-describedby="nachricht-error"></textarea>
                     <div id="nachricht-error" class="error-message" aria-live="polite"></div>
-                </div>              
+                </div>
 
                 <div class="form-actions">
                     <button type="submit" id="submit-button">Absenden</button>
@@ -115,15 +117,16 @@
     <!-- Module-Scripts -->
     <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
     <script type="module" src="assets/js/mailSender/index.js"></script>
-    
+
     <!-- Konfiguration und Initialisierung -->
     <script src="assets/js/config.js"></script>
     <script>
         // Einfache Initialisierung, wenn die Seite geladen ist
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Formular mit den vordefinierten Einstellungen initialisieren
             window.FormularKonfiguration.initialisiere();
         });
     </script>
 </body>
+
 </html>
