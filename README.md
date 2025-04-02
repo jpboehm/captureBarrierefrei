@@ -1,11 +1,13 @@
 # Capture Barrierefrei
 
-Eine barrierefreie Bot-Erkennungs- und Formularvalidierungslösung mit integriertem E-Mail-Versand-System.
+Eine barrierefreie Bot-Erkennungs- und Formularvalidierungslösung mit integrierter Formularerkennung und E-Mail-Versand-System.
 
 ![Version](https://img.shields.io/badge/version-1.2.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## Inhaltsverzeichnis
+
+
 
 - [Capture Barrierefrei](#capture-barrierefrei)
   - [Inhaltsverzeichnis](#inhaltsverzeichnis)
@@ -222,6 +224,20 @@ if (interactionRatio > 0.3 && interactionRatio < 3) {
 - Ein echter Mensch hat typischerweise: 10 Mausbewegungen (+8), 8 Tastatureingaben (+12), 3 Scrollereignisse (+7), bestätigte Checkbox (+25) → Gesamtscore: 52 (weit über dem Schwellenwert von 5)
 - Ein einfacher Bot hat: 0 Mausbewegungen (+0), 0 Tastatureingaben (+0), 0 Scrollereignisse (+0), könnte die Checkbox automatisch anklicken (+25) → Gesamtscore: 25 (bestenfalls)
 - Ein ausgeklügelter Bot müsste Mausbewegungen, Tastatureingaben und Scrollverhalten in einem menschenähnlichen Muster simulieren, was deutlich schwieriger ist als herkömmliche CAPTCHAs zu umgehen.
+
+**Fallback-Verhalten bei nicht erreichtem Score:**
+
+Wenn der Sicherheits-Score den konfigurierten Schwellenwert (standardmäßig 5) nicht erreicht, werden folgende Maßnahmen ergriffen:
+
+1. **Formularsperre**: Die Formularübermittlung wird blockiert und ein Submit-Event kann nicht erfolgreich durchgeführt werden.
+
+2. **Benutzerfeedback**: Eine visuelle und barrierefreie Rückmeldung informiert den Benutzer, dass weitere Interaktionen notwendig sind.
+
+3. **Zugängliche Anweisungen**: Klare Anweisungen erklären, welche Schritte der Benutzer unternehmen sollte (z.B. "Bitte bestätigen Sie, dass Sie kein Roboter sind").
+
+4. **Progressive Verbesserung**: Bei jeder Benutzerinteraktion wird der Score neu berechnet, sodass der Benutzer durch natürliche Interaktionen den Schwellenwert überschreiten kann.
+
+Diese Maßnahmen gewährleisten einen wirksamen Schutz gegen Bots, während gleichzeitig eine positive Benutzererfahrung für Menschen sichergestellt wird.
 
 <div style="page-break-after: always;"></div>
 
