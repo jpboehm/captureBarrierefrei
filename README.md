@@ -1,601 +1,470 @@
-# CaptureBarriereFrei - Barrierefreie Formulare mit effektivem Bot-Schutz
+# Capture Barrierefrei
 
-## Übersicht
+Eine barrierefreie Bot-Erkennungs- und Formularvalidierungslösung mit integriertem E-Mail-Versand-System.
 
-CaptureBarriereFrei bietet eine innovative, vollständig barrierefreie Alternative zu konventionellen CAPTCHA-Systemen. Die Lösung schützt Webformulare zuverlässig vor automatisierten Bot-Zugriffen und gewährleistet gleichzeitig uneingeschränkte Zugänglichkeit für alle Nutzer. Im Gegensatz zu herkömmlichen CAPTCHAs, die erhebliche Hürden für Menschen mit Behinderungen darstellen können, setzt CaptureBarriereFrei auf eine Kombination nicht-intrusiver, intelligenter Techniken zur zuverlässigen Unterscheidung zwischen menschlichen Nutzern und automatisierten Bots.
+![Version](https://img.shields.io/badge/version-1.2.0-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-### Kernfunktionen
+## Inhaltsverzeichnis
 
-- **Barrierefreier Bot-Schutz**: Robuste Sicherheit ohne Einschränkung der Zugänglichkeit
-- **Verhaltensbasierte Analyse**: Erkennung menschlicher Interaktionsmuster durch differenzierte Auswertung von Maus-, Tastatur- und Scrollverhalten
-- **Intelligente Honeypot-Mechanismen**: Strategisch platzierte, für Menschen unsichtbare Fallen für Bots
-- **Präzise Zeitanalyse**: Auswertung realistischer Formular-Ausfüllzeiten
-- **Barrierefreie Verifikation**: Semantisch korrekte und mit Screenreadern kompatible Bestätigungselemente
-- **Zuverlässiger E-Mail-Versand**: Integrierte Kommunikationsfunktionen mit automatischen Fallback-Mechanismen
-- **Modulares, erweiterbares Design**: Flexible Anpassung an unterschiedliche Anforderungen
+- [Capture Barrierefrei](#capture-barrierefrei)
+  - [Inhaltsverzeichnis](#inhaltsverzeichnis)
+  - [Einführung](#einführung)
+  - [Projektübersicht](#projektübersicht)
+  - [Architektur](#architektur)
+    - [Modularer Aufbau](#modularer-aufbau)
+    - [Sicherheitskonzept](#sicherheitskonzept)
+  - [Module](#module)
+    - [CaptureBarriereFrei](#capturebarrierefrei)
+    - [MailSender](#mailsender)
+  - [Implementierungsdetails](#implementierungsdetails)
+    - [Bot-Erkennung](#bot-erkennung)
+    - [Human-Verification](#human-verification)
+    - [Formularschutz](#formularschutz)
+    - [E-Mail-Templates](#e-mail-templates)
+  - [Barrierefreiheit](#barrierefreiheit)
+  - [Installationsanleitung](#installationsanleitung)
+  - [Konfiguration](#konfiguration)
+  - [Nutzungsbeispiele](#nutzungsbeispiele)
+  - [Lizenz](#lizenz)
 
-## Installation
+## Einführung
 
-### Systemvoraussetzungen
+Capture Barrierefrei ist eine Alternative zu herkömmlichen CAPTCHA-Systemen, die vollständig barrierefrei gestaltet wurde. Das Projekt bietet eine umfassende Lösung zum Schutz von Webformularen vor Spam-Bots und automatisierten Angriffen, während es gleichzeitig die Zugänglichkeit für alle Nutzer, einschließlich solcher mit Beeinträchtigungen, gewährleistet.
 
-- Webserver mit PHP-Unterstützung (für die E-Mail-Funktionalität)
-- Moderner Browser mit aktiviertem JavaScript
+<div style="page-break-after: always;"></div>
 
-### Einrichtungsschritte
+## Projektübersicht
 
-1. Projekt in Ihr Webverzeichnis integrieren:
-   ```bash
-   git clone [repository-url] /path/to/webserver/mailTest
-   # alternativ: manuelle Dateiübertragung
-   ```
+Die Lösung besteht aus zwei Hauptmodulen:
 
-2. PHP-Mail-Konfiguration validieren:
-   ```
-   http://localhost/mailTest/mail_diagnose.php
-   ```
+1. **CaptureBarriereFrei**: Erkennt automatisierte Bot-Zugriffe durch Verhaltensanalyse
+2. **MailSender**: Verarbeitet Formularübermittlungen und E-Mail-Versand mit Templateunterstützung
 
-3. Konfiguration anpassen (siehe nächster Abschnitt)
+Beide Module sind so konzipiert, dass sie den Prinzipien der Barrierefreiheit entsprechen und mit Screenreadern sowie anderen assistiven Technologien kompatibel sind.
 
-### Projektstruktur
+<div style="page-break-after: always;"></div>
 
-Das Projekt ist folgendermaßen organisiert:
+## Architektur
+
+### Modularer Aufbau
+
+Die Anwendung folgt einem modularen Design-Ansatz mit klar getrennten Verantwortlichkeiten:
 
 ```
-mailTest/
 ├── assets/
-│   ├── css/
-│   │   └── style.css                    # Zentrale Styling-Datei
 │   ├── js/
-│   │   ├── captureBarriereFrei/         # Modul 1: Bot-Schutz
-│   │   │   ├── botDetection.js          # Verhaltensanalyse-Logik
-│   │   │   ├── core.js                  # Kernfunktionalität
-│   │   │   ├── formProtection.js        # Formularschutz-Mechanismen
-│   │   │   ├── formValidation.js        # Validierungsfunktionen
-│   │   │   ├── index.js                 # Modul-Einstiegspunkt
-│   │   │   ├── logger.js                # Logging-Funktionalität
-│   │   │   ├── ui.js                    # UI-Komponenten
-│   │   │   └── utils.js                 # Hilfsfunktionen
-│   │   ├── config.js                    # Zentrale Konfigurationsdatei
-│   │   └── mailSender/                  # Modul 2: E-Mail-Versand
-│   │       ├── core/
-│   │       │   ├── ConfigManager.js     # Konfigurationsverwaltung
-│   │       │   └── MailSender.js        # Hauptklasse für den E-Mail-Versand
-│   │       ├── index.js                 # Modul-Einstiegspunkt
-│   │       └── utils/
-│   │           ├── ajaxHandler.js       # AJAX-Kommunikation
-│   │           ├── fileValidator.js     # Dateivalidierung
-│   │           ├── formUtils.js         # Formularhelfer
-│   │           └── templateEngine.js    # E-Mail-Template-Verarbeitung
-│   ├── php/
-│   │   └── send_mail.php                # Backend für E-Mail-Versand
-│   └── templates/
-│       ├── confirmation.html            # Bestätigungs-E-Mail-Vorlage
-│       └── contact.html                 # Kontaktformular-E-Mail-Vorlage
-├── index.html                           # Beispielseite mit Formular
-├── mail_diagnose.php                    # Tool zur Mail-Funktionsdiagnose
-└── README.md                            # Projektdokumentation
+│   │   ├── captureBarriereFrei/    # Bot-Erkennungs-Modul
+│   │   │   ├── index.js            # Einstiegspunkt
+│   │   │   ├── core.js             # Kernfunktionalität
+│   │   │   ├── botDetection.js     # Bot-Erkennungslogik
+│   │   │   ├── formProtection.js   # Formularschutz
+│   │   │   ├── formValidation.js   # Validierungsfunktionen
+│   │   │   ├── ui.js               # UI-Komponenten
+│   │   │   ├── utils.js            # Hilfsfunktionen
+│   │   │   └── logger.js           # Logging-Funktionalität
+│   │   ├── mailSender/             # E-Mail-Versand-Modul
+│   │   │   ├── index.js            # Einstiegspunkt
+│   │   │   ├── core/               # Kernfunktionalität
+│   │   │   └── utils/              # Hilfsfunktionen
+│   │   └── config.js               # Zentrale Konfiguration
+│   ├── css/                        # Stylesheet-Dateien
+│   ├── php/                        # Server-seitige Skripte
+│   └── templates/                  # E-Mail-Vorlagen
+└── index.html                      # Beispiel-Implementation
 ```
+
+### Sicherheitskonzept
+
+Das Sicherheitskonzept von Capture Barrierefrei basiert auf einem mehrstufigen Ansatz:
+
+1. **Mehrere Prüfebenen**: Anstatt sich auf einen einzelnen Sicherheitsmechanismus zu verlassen, kombiniert das System verschiedene Techniken:
+   - Verhaltensanalyse (Mausbewegungen, Tastatureingaben)
+   - Honeypot-Felder (für Bots unsichtbare Fallen)
+   - Zeitanalyse der Formularausfüllung
+   - Heuristische Bewertung von Interaktionsmustern
+   - Human-Verification-Checkbox
+
+2. **Punkte-basiertes Scoring-System**: Jede Interaktion des Benutzers wird bewertet und trägt zu einem Sicherheits-Score bei, der entscheidet, ob die Formularübermittlung erlaubt wird.
+
+3. **Kontinuierliche Überwachung**: Das System bewertet Benutzerinteraktionen während der gesamten Session und aktualisiert den Sicherheits-Score dynamisch.
+
+Diese mehrschichtige Architektur macht das System resistenter gegen Angriffe, da ein Bot alle Sicherheitsebenen überwinden müsste, um erfolgreich zu sein.
+
+<div style="page-break-after: always;"></div>
+
+## Module
+
+### CaptureBarriereFrei
+
+Das CaptureBarriereFrei-Modul ist verantwortlich für:
+
+- Erkennung von automatisierten Bot-Zugriffen
+- Schutz von Formularen
+- Validierung von Benutzereingaben
+- Bereitstellung barrierefreier UI-Komponenten
+
+**Kernfunktionen:**
+
+```javascript
+class CaptureBarriereFrei {
+    constructor(options = {}) {
+        // Konfiguration initialisieren
+        this.config = {
+            autoProtect: true,                       
+            formSelectors: 'form',                   
+            botScoreFieldName: 'security-score',     
+            startTimeFieldName: 'interaction-start-time',
+            honeypotFieldName: 'url-field',          
+            minTimeToFill: 1800,                     
+            thresholdScore: 5,                       
+            enableLogging: false,                    
+            ...options
+        };
+        
+        // Benutzerinteraktionen verfolgen
+        this.interactions = {                        
+            mouseEvents: 0,                         
+            keyboardEvents: 0,                      
+            scrollEvents: 0,
+            interactionStarted: false,              
+            securedForms: new Map()                  
+        };
+    }
+    // ...weitere Methoden
+}
+```
+
+<div style="page-break-after: always;"></div>
+
+### MailSender
+
+Das MailSender-Modul übernimmt:
+
+- Verarbeitung von Formularübermittlungen
+- Validierung von Dateianlagen
+- Anwendung von E-Mail-Templates
+- Kommunikation mit dem Backend
+
+**Kernfunktionen:**
+
+```javascript
+class MailSender {
+    constructor(config = {}) {
+        // Konfigurationsmanager initialisieren
+        this.configManager = new ConfigManager(config);
+        this.config = this.configManager.getConfig();
+        
+        // Template-Konfiguration
+        this.templateConfig = null;
+    }
+    
+    // Verarbeitet ein Formular-Submit-Event
+    handleSubmit(event) {
+        // Verhindert Standardverhalten
+        event.preventDefault();
+        
+        // Formular verarbeiten und E-Mail senden
+        // ...
+    }
+    
+    // Weitere Methoden für Template-Anwendung, E-Mail-Versand etc.
+}
+```
+
+<div style="page-break-after: always;"></div>
+
+## Implementierungsdetails
+
+### Bot-Erkennung
+
+Die Bot-Erkennung basiert auf einer Analyse mehrerer Verhaltensindikatoren:
+
+1. **Mausbewegungen**: Natürliche Mausbewegungen sind unregelmäßig und haben verschiedene Geschwindigkeiten.
+2. **Tastatureingaben**: Menschen tippen mit unterschiedlichen Geschwindigkeiten und machen Pausen.
+3. **Scrollverhalten**: Menschen scrollen meist nicht mit konstanter Geschwindigkeit.
+4. **Interaktionsbalance**: Menschen nutzen sowohl Maus als auch Tastatur in einem relativ ausgewogenen Verhältnis.
+
+**Beispiel-Scoring:**
+
+```javascript
+// Auszug aus analyzeBotBehavior in botDetection.js
+let score = 0;
+
+// Natürliche Mausbewegungen bewerten (0-8 Punkte)
+if (this.interactions.mouseEvents > 4) {
+    score += 8;
+}
+
+// Tastaturaktivität bewerten (0-12 Punkte)
+if (this.interactions.keyboardEvents > 3) {
+    score += 12;
+}
+
+// Scrollverhalten bewerten (0-7 Punkte)
+if (this.interactions.scrollEvents > 0) {
+    score += 7;
+}
+
+// "Ich bin kein Roboter" Checkbox-Status prüfen (0-25 Punkte)
+if (formConfig.humanVerification && formConfig.humanVerification.checkbox.checked) {
+    score += 25;
+}
+
+// Verhältnis zwischen Maus- und Tastaturaktivität (0-5 Bonus-Punkte)
+const interactionRatio = this.interactions.mouseEvents / (this.interactions.keyboardEvents || 1);
+if (interactionRatio > 0.3 && interactionRatio < 3) {
+    score += 5; // Bonus für ausgewogenes Verhalten
+}
+```
+
+**Rechenbeispiel:**
+- Ein echter Mensch hat typischerweise: 10 Mausbewegungen (+8), 8 Tastatureingaben (+12), 3 Scrollereignisse (+7), bestätigte Checkbox (+25) → Gesamtscore: 52 (weit über dem Schwellenwert von 5)
+- Ein einfacher Bot hat: 0 Mausbewegungen (+0), 0 Tastatureingaben (+0), 0 Scrollereignisse (+0), könnte die Checkbox automatisch anklicken (+25) → Gesamtscore: 25 (bestenfalls)
+- Ein ausgeklügelter Bot müsste Mausbewegungen, Tastatureingaben und Scrollverhalten in einem menschenähnlichen Muster simulieren, was deutlich schwieriger ist als herkömmliche CAPTCHAs zu umgehen.
+
+<div style="page-break-after: always;"></div>
+
+### Human-Verification
+
+Die Human-Verification-Komponente ist eine barrierefreie Alternative zu herkömmlichen CAPTCHAs:
+
+1. **Zugängliche Checkbox**: Vollständig mit Tastatur bedienbar und für Screenreader optimiert
+2. **ARIA-Attribute**: Umfangreiche Nutzung von ARIA-Rollen und -Attributen für bessere Zugänglichkeit
+3. **Fokus-Management**: Deutliche visuelle Fokus-Indikatoren für Tastaturnutzer
+4. **Semantisches Markup**: Korrekte HTML-Struktur für optimale Zugänglichkeit
+
+**Implementierung:**
+
+```javascript
+// Auszug aus ui.js
+export function createOrGetHumanVerification(form) {
+    // Eindeutige ID für die Checkbox
+    const checkboxId = `${form.id || getRandomId()}-human-verification`;
+    
+    // Container mit korrekter ARIA-Rolle
+    const wrapper = document.createElement('div');
+    wrapper.setAttribute('role', 'group');
+    wrapper.setAttribute('aria-labelledby', `${checkboxId}-label`);
+    
+    // Unsichtbares Label für Screenreader
+    const srLabel = document.createElement('span');
+    srLabel.id = `${checkboxId}-label`;
+    srLabel.className = 'sr-only';
+    srLabel.textContent = 'Bestätigung dass Sie kein Roboter sind';
+    
+    // Checkbox mit allen notwendigen Attributen
+    checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.id = checkboxId;
+    checkbox.setAttribute('aria-required', 'true');
+    checkbox.setAttribute('aria-describedby', `${checkboxId}-desc`);
+    
+    // Sichtbares Label
+    const label = document.createElement('label');
+    label.htmlFor = checkboxId;
+    label.textContent = 'Ich bin kein Roboter';
+    
+    // ...weitere Implementierung
+}
+```
+
+<div style="page-break-after: always;"></div>
+
+### Formularschutz
+
+Der Formularschutz kombiniert mehrere Techniken:
+
+1. **Honeypot-Felder**: Versteckte Felder, die für Menschen unsichtbar sind, aber von Bots ausgefüllt werden
+2. **Zeitanalyse**: Überwachung der Zeit, die zum Ausfüllen des Formulars benötigt wird (zu schnelles Ausfüllen deutet auf Bots hin)
+3. **Versteckte Sicherheitsfelder**: Felder zur Speicherung des Sicherheits-Scores und der Startzeit
+4. **Dynamische Validierung**: Echtzeitvalidierung der Eingaben mit Fehlerrückmeldungen
+
+**Funktionsweise:**
+
+```javascript
+// Auszug aus formProtection.js
+export function protectForm(form) {
+    // Formular-Konfiguration erstellen
+    const formConfig = {
+        requiredFields: discoverRequiredFields.call(this, form),
+        feedbackElement: createOrGetFeedbackElement.call(this, form)
+    };
+    
+    // Verstecktes Feld für Sicherheits-Score
+    formConfig.botScoreField = createOrGetHiddenField.call(
+        this, form, this.config.botScoreFieldName, '0'
+    );
+    
+    // Verstecktes Feld für Startzeit
+    formConfig.startTimeField = createOrGetHiddenField.call(
+        this, form, this.config.startTimeFieldName, Date.now().toString()
+    );
+    
+    // Honeypot-Feld hinzufügen
+    formConfig.honeypotField = createOrGetHoneypotField.call(this, form);
+    
+    // Human-Verification-Checkbox hinzufügen
+    formConfig.humanVerification = createOrGetHumanVerification.call(this, form);
+    
+    // Event-Listener und weitere Schutzmaßnahmen...
+}
+```
+
+<div style="page-break-after: always;"></div>
+
+### E-Mail-Templates
+
+Das Template-System ermöglicht dynamische E-Mail-Inhalte:
+
+1. **Platzhalter-Ersetzung**: `{{variableName}}` wird durch entsprechende Werte ersetzt
+2. **Bedingte Blöcke**: `{{#if bedingung}}...{{/if}}` für bedingte Inhalte
+3. **Schleifen**: `{{#each array}}...{{/each}}` für wiederholte Inhalte
+4. **Dynamische Felder**: Automatische Generierung von E-Mail-Inhalten basierend auf Formulardaten
+
+**Beispiel:**
+
+```javascript
+// Auszug aus templateEngine.js
+export function replacePlaceholders(template, data, templateConfig) {
+    let result = template;
+
+    // Einfache Platzhalter ersetzen {{name}}
+    result = result.replace(/\{\{([^#\/][^}]*)\}\}/g, (match, key) => {
+        // Prüfen auf Funktionen, Daten oder Standardwerte...
+        // ...
+        return value || '';
+    });
+
+    // Bedingte Blöcke verarbeiten
+    result = processConditionalBlocks(result, data);
+
+    // Schleifen verarbeiten
+    if (data.attachments) {
+        result = processLoops(result, data);
+    }
+
+    return result;
+}
+```
+
+<div style="page-break-after: always;"></div>
+
+## Barrierefreiheit
+
+Capture Barrierefrei wurde mit Fokus auf Zugänglichkeit entwickelt:
+
+1. **Tastaturzugänglichkeit**: Alle Funktionen sind vollständig per Tastatur bedienbar
+2. **Screenreader-Unterstützung**: ARIA-Attribute und semantisches HTML für optimale Screenreader-Kompatibilität
+3. **Skip-Links**: Ermöglichen Tastaturnutzern, direkt zum Hauptinhalt zu springen
+4. **Farben und Kontraste**: Ausreichende Kontrastverhältnisse gemäß WCAG 2.1
+5. **Fehlerfeedback**: Klare, zugängliche Fehlermeldungen
+6. **Fokus-Management**: Deutliche visuelle Fokusanzeigen und logische Fokusreihenfolge
+
+<div style="page-break-after: always;"></div>
+
+## Installationsanleitung
+
+1. **Dateien kopieren**:
+   Kopieren Sie den gesamten `captureBarrierefrei`-Ordner in Ihr Webprojekt.
+
+2. **Skripte einbinden**:
+   ```html
+   <!-- CaptureBarriereFrei und MailSender Module -->
+   <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
+   <script type="module" src="assets/js/mailSender/index.js"></script>
+   
+   <!-- Konfiguration -->
+   <script src="assets/js/config.js"></script>
+   <script>
+     document.addEventListener('DOMContentLoaded', function() {
+       window.FormularKonfiguration.initialisiere();
+     });
+   </script>
+   ```
+
+3. **Formular vorbereiten**:
+   ```html
+   <form id="kontaktFormular" method="post" class="protected" data-template="kontakt">
+     <!-- Formularfelder -->
+   </form>
+   ```
+
+4. **PHP-Backend einrichten**: 
+   Stellen Sie sicher, dass `send_mail.php` auf Ihrem Server korrekt konfiguriert ist.
+
+<div style="page-break-after: always;"></div>
 
 ## Konfiguration
 
-Die Konfiguration erfolgt über die zentrale Datei `assets/js/config.js`. Hier werden alle Einstellungen für beide Module definiert:
+Die Hauptkonfiguration erfolgt in `config.js`:
 
 ```javascript
-// Empfängeradresse für das Kontaktformular
-const EMPFAENGER_EMAIL = 'ihre.email@domain.de';
+// Empfänger-Einstellungen
+const EMPFAENGER_EMAIL = 'ihre-email@domain.de';
+const EMAIL_BETREFF = 'Neue Nachricht vom Kontaktformular';
 
-// Betreff für die E-Mail
-const EMAIL_BETREFF = 'Neue Anfrage über Ihr Kontaktformular';
+// Formular-Einstellungen
+const FORMULAR_ID = '#kontaktFormular';
+const FORMULAR_ZURUECKSETZEN = true;
 
 // Bot-Schutz-Einstellungen
-const MIN_AUSFUELLZEIT = 3000;            // Millisekunden
-const SCHWELLWERT_PUNKTE = 10;            // Erforderliche Punkte für gültige Absendung
+const BOT_SCHUTZ_AKTIVIEREN = true;
+const MIN_AUSFUELLZEIT = 3; // Sekunden
 
-// Dateiupload-Einstellungen
-const MAX_DATEIGROESSE = 5;               // MB
-const ERLAUBTE_DATEITYPEN = ['.jpg', '.jpeg', '.png', '.pdf'];
-
-// Debug-Einstellungen
-const DEBUGGING = false;                  // Debug-Meldungen in der Konsole anzeigen
+// Weitere Einstellungen für Dateiuploads, Templates etc.
 ```
 
-Die detaillierten Konfigurationsoptionen werden automatisch in der `erstelleModulKonfigurationen()`-Funktion verarbeitet und an die entsprechenden Module übergeben.
+<div style="page-break-after: always;"></div>
 
-## Einbindung
+## Nutzungsbeispiele
 
-### HTML-Grundstruktur
+**Einfache Implementierung:**
 
 ```html
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Kontaktformular</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-</head>
-<body>
-    <!-- Formular mit der Klasse "protected" für automatischen Bot-Schutz -->
-    <form id="kontaktFormular" method="post" class="protected">
-        <!-- Formularfelder können beliebig angepasst und erweitert werden -->
-        <div class="form-group">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" required>
-        </div>
-        
-        <div class="form-group">
-            <label for="email">E-Mail</label>
-            <input type="email" id="email" name="email" required>
-        </div>
-        
-        <!-- Dateiupload-Unterstützung -->
-        <div class="form-group">
-            <label for="upload">Datei-Upload</label>
-            <input type="file" id="upload" name="upload" accept=".jpg, .jpeg, .png, .pdf">
-            <p class="file-size-info">Maximale Dateigröße: 5 MB</p>
-        </div>
-        
-        <div class="form-group">
-            <label for="message">Nachricht</label>
-            <textarea id="message" name="message" required></textarea>
-        </div>
-        
-        <div class="form-actions">
-            <button type="submit">Nachricht senden</button>
-        </div>
-    </form>
-
-    <!-- Feedback-Bereich für Statusmeldungen -->
-    <div id="form-feedback" aria-live="polite"></div>
-
-    <!-- Script-Einbindung -->
-    <script src="assets/js/config.js"></script>
-    <!-- Module als ES6-Module einbinden -->
-    <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
-    <script type="module" src="assets/js/mailSender/index.js"></script>
-    <script>
-        // Initialisierung starten, wenn das DOM geladen ist
-        document.addEventListener('DOMContentLoaded', function() {
-            // Konfiguration einlesen und beide Module initialisieren
-            FormularKonfiguration.initialisiere();
-        });
-    </script>
-</body>
-</html>
+<form id="kontaktFormular" class="protected">
+  <div class="form-group">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required>
+  </div>
+  <div class="form-group">
+    <label for="email">E-Mail</label>
+    <input type="email" id="email" name="email" required>
+  </div>
+  <div class="form-group">
+    <label for="nachricht">Nachricht</label>
+    <textarea id="nachricht" name="nachricht" required></textarea>
+  </div>
+  <button type="submit">Absenden</button>
+</form>
 ```
 
-> **Hinweis zur Formulargestaltung**: Das HTML-Formular kann beliebig angepasst und mit zusätzlichen Feldern erweitert werden. Die Module lesen alle vorhandenen Formularfelder dynamisch aus und verarbeiten diese automatisch. Achten Sie lediglich darauf, jedem Feld eine eindeutige ID und einen Namen zuzuweisen.
-
-## Modul 1: CaptureBarriereFrei - Intelligente Bot-Erkennung
-
-### Komponenten
-
-- **Core (core.js)**: Zentrales Steuerungsmodul mit Hauptlogik
-- **BotDetection (botDetection.js)**: Fortschrittliche Verhaltensanalyse
-- **FormProtection (formProtection.js)**: Implementierung mehrschichtiger Schutzstrategien
-- **UI (ui.js)**: Barrierefreie Benutzeroberfläche mit ARIA-Integration
-- **FormValidation (formValidation.js)**: Robuste, client-seitige Validierungsfunktionen
-- **Utils (utils.js)**: Optimierte Hilfsfunktionen für verschiedene Aufgaben
-- **Logger (logger.js)**: Konfigurierbares Logging- und Debugging-System
-
-### Funktionsprinzipien und Schutzmechanismen
-
-#### Mehrschichtige Verhaltensanalyse
-
-Das System erfasst und analysiert differenzierte Interaktionsmuster durch:
-
-- **Präzise Bewegungsverfolgung**: Analyse von Mausbewegungen, Klickmustern und -sequenzen
-- **Tastaturinteraktionsanalyse**: Erfassung von Eingabegeschwindigkeit, Rhythmus und Mustern
-- **Scrollverhaltenserkennung**: Identifikation natürlicher Scrollmuster und -geschwindigkeiten
-- **Interaktionsgewichtung**: Algorithmische Auswertung der Balance zwischen verschiedenen Interaktionsformen
-
-#### Zeitliche Verhaltensanalyse
-
-Die Lösung implementiert eine fortschrittliche temporale Analyse:
-
-- **Zeitfensterüberwachung**: Messung der Gesamtinteraktionszeit mit dem Formular
-- **Dynamische Schwellwertanpassung**: Konfigurierbare Mindestinteraktionszeiten je nach Formulartyp
-- **Musteranalyse**: Erkennung unnatürlich schneller oder mechanischer Eingabesequenzen
-
-#### Honeypot-Technologie
-
-Strategisch implementierte Fallen für automatisierte Systeme:
-
-- **Für Menschen unsichtbar**: Vollständige Verbergung durch CSS (position: absolute; left: -9999px)
-- **Screenreader-kompatibel**: Korrekte Implementierung von aria-hidden="true"
-- **Tab-Navigation-sicher**: Ausschluss aus der Tabreihenfolge (tabindex="-1")
-
-#### Barrierefreie Verifikation
-
-Eine innovative, zugängliche Alternative zu traditionellen CAPTCHA-Elementen:
-
-- **Vollständige Tastaturbedienbarkeit**: Optimierte Bedienung ohne Maus
-- **Semantisch korrekte ARIA-Attribute**: Präzise Spezifikation der Rolle und des Status
-- **Multimodale Rückmeldung**: Visuelles, akustisches und strukturelles Feedback
-
-#### Score-basierte Entscheidungslogik
-
-Ein nuanciertes Punktesystem bewertet Interaktionen und ermöglicht eine präzise Klassifizierung:
-
-- **Kumulative Bewertung**: Zusammenführung verschiedener Interaktionsmetriken
-- **Gewichtete Faktoren**: Priorisierung besonders aussagekräftiger Verhaltensmuster
-- **Dynamische Schwellenwerte**: Anpassbare Grenzen für unterschiedliche Sicherheitsanforderungen
-
-##### Beispielanalyse eines menschlichen Nutzers:
-- Diverse Mausinteraktionen: +8 Punkte
-- Mehrere Tastatureingaben: +12 Punkte
-- Natürliches Scrollverhalten: +7 Punkte
-- Aktivierte Verifikation: +25 Punkte
-- Ausgewogene Interaktion: +5 Punkte
-- **Gesamtwert: 57 Punkte** (deutlich über dem Standardschwellwert von 5)
-
-Der Standardschwellwert lässt sich über die `thresholdScore`-Konfiguration anpassen.
-
-### Barrierefreiheitskonzepte
-
-#### Screenreader-Optimierung
-
-- Semantisch strukturierter HTML-Code mit korrekten Elementrollen
-- Strategisch platzierte ARIA-Live-Regionen für dynamische Inhalte
-- Kontextbezogene, informative Fehlermeldungen
-
-#### Umfassende Tastaturzugänglichkeit
-
-- Implementierung von Skip-Links für effiziente Navigation
-- Durchdachte, logische Tabulator-Sequenz
-- Deutliche visuelle Fokusindikatoren für alle interaktiven Elemente
-
-#### Validierung mit Fokus auf Zugänglichkeit
-
-- Kontextbezogene, feldspezifische Fehlermeldungen
-- ARIA-basierte Statuskommunikation
-- Klare Handlungsanweisungen zur Fehlerkorrektur
-
-### Konfigurationsoptionen
+**Benutzerdefinierte Konfiguration:**
 
 ```javascript
 const captureConfig = {
-    autoProtect: true,                  // Automatische Aktivierung für alle passenden Formulare
-    formSelectors: 'form.protected',    // Ziel-Selektoren
-    botScoreFieldName: 'security-score', // Bezeichner des Sicherheitsfeldes
-    minTimeToFill: 3000,                // Minimale Ausfüllzeit in ms
-    thresholdScore: 10,                 // Erforderlicher Mindestsicherheitswert
-    enableLogging: false                // Aktivierung detaillierter Protokollierung
+  formSelectors: '#meinFormular',
+  minTimeToFill: 5000,  // 5 Sekunden
+  thresholdScore: 20    // Höherer Schwellenwert für mehr Sicherheit
 };
-```
 
-## Modul 2: MailSender - Zuverlässige E-Mail-Kommunikation
-
-### Übersicht
-
-Das MailSender-Modul stellt ein professionelles System zur sicheren Verarbeitung und Übermittlung von Formulardaten per E-Mail bereit. Es ist vollständig mit dem CaptureBarriereFrei-Modul integrierbar und wird über die zentrale Konfigurationsdatei gesteuert.
-
-### Architektur
-
-#### Frontend-Komponenten
-- **MailSender (mailSender.js)**: Hauptklasse zur Formularverarbeitung und API-Kommunikation
-- **UI-Integration**: Barrierefreie Feedback- und Statusanzeigeelemente
-
-#### Backend-Komponenten
-- **Mail-Prozessor (send_mail.php)**: Server-seitige Datenverarbeitung und E-Mail-Versand
-- **Diagnose-Tool (mail_diagnose.php)**: Überprüfungswerkzeug für die Mail-Konfiguration
-
-### Funktionaler Ablauf
-
-#### 1. Initialisierung und Konfiguration
-Bei der Initialisierung wird das Zielformular mit spezialisierten Event-Listenern ausgestattet:
-
-```javascript
-const mailSender = new MailSender({
-    recipient: 'empfaenger@beispiel.de',
-    formSelector: '#kontaktFormular',
-    fallbackToMailto: true
-});
-```
-
-#### 2. Intelligente Formularverarbeitung
-Bei der Formularübermittlung durchläuft das System folgende Phasen:
-
-1. **Event-Interception**: Kontrollierte Übernahme des Submit-Prozesses
-2. **Validierung**: Optionale, anpassbare Client-seitige Datenprüfung
-3. **Strukturierte Datensammlung**: Aufbereitung der Formularfelder als FormData-Objekt
-4. **Sicherheitsintegration**: Nahtlose Einbindung des CaptureBarriereFrei-Sicherheitsscores
-5. **Asynchrone Übermittlung**: Effiziente AJAX-Kommunikation mit dem Backend
-
-#### 3. Server-seitige Verarbeitung
-Der Backend-Prozessor führt eine mehrstufige Verarbeitung durch:
-
-1. **Eingabevalidierung**: Umfassende Prüfung auf Vollständigkeit und Datenintegrität
-2. **Inhaltsgenerierung**: Strukturierte Aufbereitung der E-Mail-Inhalte
-3. **Versandprozess**: Flexible Nutzung von PHP mail() oder alternativen Transportmethoden
-4. **Strukturierte Antwort**: Generierung standardisierter JSON-Antworten mit Statusinformationen
-
-#### 4. Fehlertoleranz und Ausfallsicherheit
-Das Modul implementiert mehrschichtige Fehlerbehandlungsstrategien:
-
-1. **Netzwerkfehler-Erkennung**: Identifikation und Behandlung von HTTP-Fehlern
-2. **Transportfehler-Management**: Erkennung von Mail-Server-Problemen
-3. **Fallback-Mechanismen**: Optionale Aktivierung von mailto-Links bei Serverfehlern
-4. **Nutzerkommunikation**: Transparente Statusmeldungen mit Handlungsempfehlungen
-
-#### 5. Sicherheitsarchitektur
-Umfassende Sicherheitsmaßnahmen schützen vor Missbrauch:
-
-1. **Header-Authentifizierung**: Validierung der Anfrage-Herkunft
-2. **Eingabesanitisierung**: Umfassende Bereinigung aller Datenfelder
-3. **Anti-Spam-Integration**: Nahtlose Verknüpfung mit CaptureBarriereFrei
-4. **Transportverschlüsselung**: Optionale HTTPS-Erzwingung
-
-### Verfügbare Konfigurationsoptionen
-
-In der `config.js` werden die wichtigsten Einstellungen definiert. Intern werden folgende Parameter unterstützt:
-
-```javascript
 const mailConfig = {
-    // Grundkonfiguration
-    recipient: 'empfaenger@beispiel.de',   // Zieladresse
-    subject: 'Neue Formularanfrage',       // E-Mail-Betreff
-    formSelector: '#kontaktFormular',      // Formular-Identifikation
-    
-    // Übermittlungskonfiguration
-    endpoint: 'send_mail.php',             // Backend-Endpunkt
-    method: 'POST',                        // HTTP-Methode
-    fallbackToMailto: true,                // Aktivierung des Fallback-Mechanismus
-    
-    // Sicherheitskonfiguration
-    requireSecurityField: true,            // Integration mit CaptureBarriereFrei
-    securityFieldName: 'security-score',   // Bezeichner des Sicherheitsfeldes
-    
-    // Benutzererfahrung
-    successMessage: 'Vielen Dank! Ihre Nachricht wurde erfolgreich übermittelt.',
-    errorMessage: 'Bei der Übermittlung ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.',
-    mailtoErrorMessage: 'Die direkte Übermittlung ist fehlgeschlagen. Ihr E-Mail-Programm wird geöffnet...',
-    resetFormAfterSubmit: true,            // Formularrücksetzung nach erfolgreicher Übermittlung
-    
-    // Systemkonfiguration
-    debug: false,                          // Aktivierung detaillierter Protokollierung
-    preserveFormHandlers: true,            // Erhaltung vorhandener Event-Handler
-    scrollToFeedback: true,                // Automatisches Scrollen zum Feedback-Element
-    feedbackElement: '#form-feedback',     // Selektor für das Feedback-Element
-    feedbackDuration: 5000                 // Anzeigedauer von Statusmeldungen (0 = permanent)
+  recipient: 'team@domain.de',
+  subject: 'Kontaktanfrage Website',
+  endpoint: 'mein-handler.php'
 };
+
+// Instanzen initialisieren
+const captureInstance = new CaptureBarriereFrei(captureConfig);
+const mailSender = new MailSender(mailConfig);
 ```
 
-Diese Konfiguration wird automatisch aus den Grundeinstellungen in `config.js` erzeugt. Bei speziellen Anforderungen kann die Konfiguration erweitert werden.
-
-### Erweiterungsmöglichkeiten
-
-#### Alternative Transportmechanismen
-Das System unterstützt die Integration spezialisierter Mail-Transport-Bibliotheken:
-
-```php
-// Integration von PHPMailer für SMTP-Versand
-function sendMailSMTP($to, $subject, $message, $headers) {
-    $mail = new PHPMailer(true);
-    $mail->isSMTP();
-    $mail->Host = 'smtp.example.com';
-    $mail->SMTPAuth = true;
-    $mail->Username = 'user@example.com';
-    $mail->Password = 'password';
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-    $mail->Port = 587;
-    
-    $mail->setFrom('from@example.com', 'Formular-System');
-    $mail->addAddress($to);
-    $mail->Subject = $subject;
-    $mail->Body = $message;
-    
-    return $mail->send();
-}
-```
-
-#### Erweiterte Validierungsregeln
-Das MailSender-Modul unterstützt benutzerdefinierte Validierungslogik:
-
-```javascript
-mailSender.addCustomValidator('field-name', function(value) {
-    // Spezialisierte Validierungslogik
-    return value.length >= 5 && /^[a-z0-9]+$/i.test(value);
-}, 'Bitte geben Sie mindestens 5 alphanumerische Zeichen ein.');
-```
-
-#### Template-basierte E-Mail-Generierung
-Für komplexere Anwendungsfälle steht eine Template-Engine zur Verfügung:
-
-```php
-// Flexibles Template-System
-function loadEmailTemplate($templateName, $variables) {
-    $template = file_get_contents("templates/{$templateName}.html");
-    foreach ($variables as $key => $value) {
-        $template = str_replace("{{" . $key . "}}", htmlspecialchars($value), $template);
-    }
-    return $template;
-}
-```
-
-## Integration beider Module
-
-### Implementierungsbeispiel
-
-```html
-<!-- Einbindung der Stylesheets -->
-<link rel="stylesheet" href="assets/css/style.css" />
-
-<!-- Formular mit Schutzkennzeichnung -->
-<form id="kontaktFormular" method="post" class="protected">
-    <!-- Strukturierte Formularsektionen - können beliebig angepasst werden -->
-    <div class="form-group">
-        <label for="name">Name</label>
-        <input type="text" id="name" name="name" required>
-    </div>
-    <div class="form-group">
-        <label for="email">E-Mail</label>
-        <input type="email" id="email" name="email" required>
-    </div>
-    <div class="form-group">
-        <label for="message">Nachricht</label>
-        <textarea id="message" name="message" required></textarea>
-    </div>
-    <div class="form-actions">
-        <button type="submit">Nachricht senden</button>
-    </div>
-</form>
-
-    <!--    Skripte für die Funktionalität 
-            Folgende Skripte sind erforderlich:
-            - captureBarriereFrei/index.js: Hauptskript für die Formularverarbeitung
-            - mailSender/index.js: Skript für den E-Mail-Versand
-            - config.js: Konfiguration und Initialisierung
-
-            Die Skripte sind in der Reihenfolge geladen, in der sie benötigt werden.
-            Wichtig: Sie müssen als ES6-Module geladen werden.
-    -->
-    <!-- Module-Scripts -->
-    <script type="module" src="assets/js/captureBarriereFrei/index.js"></script>
-    <script type="module" src="assets/js/mailSender/index.js"></script>
-    
-    <!-- Konfiguration und Initialisierung -->
-    <script src="assets/js/config.js"></script>
-    <script>
-        // Einfache Initialisierung, wenn die Seite geladen ist
-        document.addEventListener('DOMContentLoaded', function() {
-            // Formular mit den vordefinierten Einstellungen initialisieren
-            window.FormularKonfiguration.initialisiere();
-        });
-    </script>
-```
-
-## Prozessablauf der integrierten Lösung
-
-### 1. Systeminitialisierung
-- CaptureBarriereFrei etabliert Schutzmaßnahmen und Interaktions-Tracking
-- MailSender übernimmt die Formularsteuerung und bereitet Kommunikationswege vor
-
-### 2. Nutzerinteraktionsphase
-- CaptureBarriereFrei analysiert kontinuierlich Interaktionsmuster und aktualisiert den Sicherheitsscore
-- Benutzer interagiert mit dem Formular und vervollständigt seine Eingaben
-
-### 3. Übermittlungsphase
-- MailSender übernimmt die Kontrolle beim Formularversand
-- CaptureBarriereFrei finalisiert den Sicherheitsscore basierend auf der Gesamtinteraktion
-- MailSender integriert den Score in die zu übermittelnden Daten
-
-### 4. Kommunikationsphase
-- MailSender überträgt die Daten inkl. Sicherheitsinformationen an den Server
-- Backend-Prozessor validiert den Sicherheitsscore und die Formulardaten
-- Bei positivem Ergebnis erfolgt die E-Mail-Generierung und der Versand
-
-### 5. Abschlussphase
-- MailSender verarbeitet die Server-Antwort und aktualisiert die Benutzeroberfläche
-- Bei erfolgreicher Übermittlung wird eine Bestätigung angezeigt
-- Bei Fehlern werden entsprechende Maßnahmen (z.B. Fallback) eingeleitet
-
-## Anpassung und Erweiterung
-
-### Zentrale Konfigurationsanpassung
-
-Die sauberste Methode zur Anpassung ist die Bearbeitung der `config.js`. Für fortgeschrittene Anpassungen können Sie die folgenden Ansätze verwenden:
-
-### Visuelle Anpassungen
-
-Die Darstellung lässt sich über CSS individualisieren:
-- `assets/css/style.css` - Zentrale Styling-Datei
-- UI-Komponenten - Individuelle Anpassungen der Interaktionselemente
-
-### Formularanpassungen
-
-Das System ist so konzipiert, dass es mit beliebigen Formularstrukturen arbeitet:
-
-- Sie können jede Art von Formularfeld hinzufügen (Input, Select, Textarea, etc.)
-- Alle Felder werden automatisch ausgelesen und in die E-Mail übernommen
-- Formularlabels werden intelligent erkannt und für die Strukturierung der E-Mail verwendet
-- Dateiuploads werden unterstützt und automatisch als Anhänge verarbeitet
-- Bestehende Validierungsattribute (required, pattern, etc.) werden respektiert
-
-Beispiel für ein erweitertes Formularfeld:
-
-```html
-<div class="form-group">
-    <label for="anfrage-typ">Art der Anfrage</label>
-    <select id="anfrage-typ" name="anfrage-typ" required aria-required="true">
-        <option value="" disabled selected>Bitte wählen</option>
-        <option value="allgemein">Allgemeine Anfrage</option>
-        <option value="angebot">Angebotsanfrage</option>
-        <option value="support">Technischer Support</option>
-    </select>
-    <div id="anfrage-typ-error" class="error-message" aria-live="polite"></div>
-</div>
-```
-
-### Funktionale Erweiterungen
-
-Die Erweiterung der Funktionalität sollte vorzugsweise über eigene JavaScript-Dateien erfolgen, die nach der Grundinitialisierung geladen werden:
-
-```javascript
-// In einer eigenen Datei, z.B. custom-extensions.js
-document.addEventListener('DOMContentLoaded', function() {
-    // Warten auf Abschluss der Grundinitialisierung
-    setTimeout(function() {
-        // Nach der Initialisierung durch FormularKonfiguration
-        // haben wir Zugriff auf die globalen Instanzen
-        
-        // Erweiterung der Validierung
-        const originalValidateField = window.captureBarriereFreiInstance.validateField;
-        window.captureBarriereFreiInstance.validateField = function(input, errorElement) {
-            // Basisvalidierung
-            const isValid = originalValidateField.call(this, input, errorElement);
-            
-            // Eigene Validierung
-            if (isValid && input.name === 'iban') {
-                return this.validateIBAN(input.value, errorElement);
-            }
-            
-            return isValid;
-        };
-        
-        // Implementierung eigener Validierungsmethoden
-        window.captureBarriereFreiInstance.validateIBAN = function(value, errorElement) {
-            const isValid = /^[A-Z]{2}\d{2}[A-Z0-9]{12,30}$/.test(value);
-            if (!isValid) {
-                this.showError(errorElement, 'Bitte geben Sie eine gültige IBAN ein.');
-            }
-            return isValid;
-        };
-    }, 500); // Kurze Verzögerung, um sicherzustellen, dass die Initialisierung abgeschlossen ist
-});
-```
-
-## Problemlösungen
-
-### Übermittlungsprobleme
-
-Bei Schwierigkeiten mit der Datenübermittlung:
-- Überprüfen Sie die Browser-Konsole auf JavaScript-Fehler
-- Führen Sie eine Diagnose der Mail-Funktionalität mit mail_diagnose.php durch
-- Aktivieren Sie den Debug-Modus beider Module für detaillierte Protokolle
-
-### Mail-Übermittlungsprobleme
-
-Bei Problemen mit dem E-Mail-Versand:
-- Validieren Sie die PHP mail()-Konfiguration Ihres Servers
-- Erwägen Sie alternative Transportmethoden wie SMTP mit PHPMailer
-- Überprüfen Sie Firewall- und Portkonfigurationen für ausgehende Mails
-
-### Barrierefreiheitsprobleme
-
-Bei Zugänglichkeitsproblemen:
-- Testen Sie mit verschiedenen Screenreadern (NVDA, JAWS, VoiceOver)
-- Überprüfen Sie Farbkontraste mit WCAG-konformen Tools
-- Validieren Sie die Tastaturbedienbarkeit aller interaktiven Elemente
+<div style="page-break-after: always;"></div>
 
 ## Lizenz
 
-Dieses Projekt steht unter der MIT-Lizenz - Details finden Sie in der LICENSE-Datei.
+Dieses Projekt steht unter der MIT-Lizenz. Siehe [LICENSE](LICENSE) für Details.
 
-## Mitwirkende
+---
 
-- JP.Böhm - Hauptentwickler und Projektmaintainer
-
-## Danksagungen
-
-- Besonderer Dank gilt der Barrierefreiheits-Community für wertvolle Impulse
-- Inspiration durch etablierte Sicherheitslösungen, neu gedacht mit Fokus auf universelle Zugänglichkeit
+Entwickelt von JP.Böhm - © 2025 Alle Rechte vorbehalten
