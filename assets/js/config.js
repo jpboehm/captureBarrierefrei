@@ -7,7 +7,7 @@
 
 // ------ EMPFÄNGER-EINSTELLUNGEN ------
 const EMPFAENGER_EMAIL = 'moin@jpboehm.de';     // Tragen Sie hier Ihre E-Mail-Adresse ein
-const EMAIL_BETREFF = 'Neue Nachricht vom Kontaktformular';
+const EMAIL_BETREFF = 'Neue Nachricht vom Kontaktformular'; // Betreff der E-Mail
 
 // ------ FORMULAR-EINSTELLUNGEN ------
 const FORMULAR_ID = '#kontaktFormular';         // Die ID des Formulars (mit # davor)
@@ -27,11 +27,11 @@ const BESTAETIGUNGSMAIL_SENDEN = true;          // Automatische Bestätigungsmai
 
 // ------ BOT-SCHUTZ-EINSTELLUNGEN ------
 const BOT_SCHUTZ_AKTIVIEREN = true;             // Schutz gegen automatisierte Anfragen
-const MIN_AUSFUELLZEIT = 3;                     // Minimale Zeit zum Ausfüllen in Sekunden
+const MIN_AUSFUELLZEIT = 5;                     // Minimale Zeit zum Ausfüllen in Sekunden
 
 // ------ ERWEITERTE EINSTELLUNGEN ------
 // Diese Einstellungen müssen normalerweise nicht geändert werden
-const DEBUGGING = false;                        // Debug-Meldungen in der Konsole anzeigen
+const DEBUGGING = true;                        // Debug-Meldungen in der Konsole anzeigen
 
 /**
  * BITTE UNTENSTEHENDEN CODE NICHT ÄNDERN,
@@ -44,8 +44,9 @@ function erstelleModulKonfigurationen() {
   const captureConfig = {
     formSelectors: BOT_SCHUTZ_AKTIVIEREN ? 'form.protected' : '',
     minTimeToFill: MIN_AUSFUELLZEIT * 1000,
-    thresholdScore: 10,
-    enableLogging: DEBUGGING
+    thresholdScore: 40, // Minimale Punktzahl für den Bot-Schutz
+    enableLogging: DEBUGGING,
+    logLevel: DEBUGGING ? 'debug' : 'info'  // Wenn Debugging aktiv ist, auch Debug-Level einstellen
   };
   
   // E-Mail-Konfiguration

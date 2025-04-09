@@ -28,11 +28,12 @@ Eine barrierefreie Bot-Erkennungs- und Formularvalidierungslösung mit integrier
   - [Installationsanleitung](#installationsanleitung)
   - [Konfiguration](#konfiguration)
   - [Nutzungsbeispiele](#nutzungsbeispiele)
+  - [TODO und überlegung](#todo-und-überlegung)
   - [Lizenz](#lizenz)
 
 ## Einführung
 
-Capture Barrierefrei ist eine Alternative zu herkömmlichen CAPTCHA-Systemen, die vollständig barrierefrei gestaltet wurde. Das Projekt bietet eine umfassende Lösung zum Schutz von Webformularen vor Spam-Bots und automatisierten Angriffen, während es gleichzeitig die Zugänglichkeit für alle Nutzer, einschließlich solcher mit Beeinträchtigungen, gewährleistet.
+Capture Barrierefrei ist eine Alternative zu herkömmlichen CAPTCHA-Systemen, die barrierefrei gestaltet wurde. Das Projekt bietet ein Grundgerüst für eine agnostische Lösung zum Schutz von Webformularen vor Spam-Bots und automatisierten Angriffen, während es gleichzeitig die Zugänglichkeit für alle Nutzer, einschließlich solcher mit Beeinträchtigungen, gewährleistet.
 
 <div style="page-break-after: always;"></div>
 
@@ -476,6 +477,26 @@ const mailSender = new MailSender(mailConfig);
 ```
 
 <div style="page-break-after: always;"></div>
+
+## TODO und überlegung
+.env
+php in base64?
+Dynamische Scores bilden (Jitter, interaction ... )
+nichtlineare Skalen da authentischer 
+
+```
+
+
+ts
+Kopieren
+Bearbeiten
+function scoreMausbewegung(bewegungen: number): number {
+  if (bewegungen === 0) return 0;
+  if (bewegungen < 5) return 2;
+  if (bewegungen < 15) return 6;
+  return 10;
+}
+```
 
 ## Lizenz
 
